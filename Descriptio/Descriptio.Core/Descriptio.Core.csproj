@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+
+    <Title>Descript.io Core</Title>
+    <Authors>David Eiwen, Sandra Schneider, Leonhardt Schwartz</Authors>
+    <PackageId>Descriptio.Core</PackageId>
+    <Product>Descript.io</Product>
+    <Version>1.0.0-alpha001</Version>
+    <RepositoryUrl>https://github.com/david1995/Descript.io</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/david1995/Descript.io</PackageProjectUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/david1995/Descript.io/master/LICENSE</PackageLicenseUrl>
+    <Copyright>© 2018 David Eiwen, Sandra Schneider, Leonhardt Schwartz</Copyright>
+    <PackageTags>markdown transform document</PackageTags>
+  </PropertyGroup>
+
+</Project>
