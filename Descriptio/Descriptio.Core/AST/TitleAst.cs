@@ -4,10 +4,10 @@ namespace Descriptio.Core.AST
 {
     public class TitleAst : IAbstractSyntaxTreeBlock
     {
-        public TitleAst(string text, int level = 0, IAbstractSyntaxTreeBlock next = null)
+        public TitleAst(string text, int level = 1, IAbstractSyntaxTreeBlock next = null)
         {
             Text = string.IsNullOrEmpty(text) ? throw new ArgumentNullException(nameof(text)) : text;
-            Level = level < 0 ? throw new ArgumentOutOfRangeException(nameof(level)) : level;
+            Level = level <= 0 ? throw new ArgumentOutOfRangeException(nameof(level)) : level;
             Next = next;
         }
 

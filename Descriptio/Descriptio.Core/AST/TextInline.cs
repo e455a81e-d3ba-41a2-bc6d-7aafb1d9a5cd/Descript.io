@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Descriptio.Core.Extensions;
+﻿using Descriptio.Core.Extensions;
 
 namespace Descriptio.Core.AST
 {

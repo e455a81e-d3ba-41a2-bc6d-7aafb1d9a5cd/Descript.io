@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Descriptio.Core.AST
 {
-    public interface IAbstractSyntaxTreeLeaf : IAbstractSyntaxTree
+    public interface IAbstractSyntaxTreeInline : IAbstractSyntaxTree
     {
     }
 }

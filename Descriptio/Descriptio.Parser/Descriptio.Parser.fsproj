@@ -6,7 +6,8 @@
 
   <ItemGroup>
     <Compile Include="Core.fs" />
-    <Compile Include="Markdown.fs" />
+    <Compile Include="MarkdownLexer.fs" />
+    <Compile Include="MarkdownParser.fs" />
   </ItemGroup>
 
   <ItemGroup>
