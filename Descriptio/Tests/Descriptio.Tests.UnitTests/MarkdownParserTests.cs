@@ -28,7 +28,7 @@ namespace Descriptio.Tests.UnitTests
             var result = lexer.Lex(source);
 
             // ASSERT
-            result.Should();
+            result.Should().NotBeNull();
         }
     }
 }
