@@ -1,7 +1,8 @@
-﻿namespace Descriptio.Parser
-
+﻿namespace Descriptio.Parser.Core
 open Descriptio.Core.AST
 
-module public Core =
-    type public IParser<'T> =
-        abstract member Parse : 'T -> IAbstractSyntaxTree
+type public ILexer<'TIn, 'TOut> =
+    abstract member Lex : input:'TIn -> 'TOut option
+
+type public IParser<'T> =
+    abstract member Parse : input:'T -> IAbstractSyntaxTree

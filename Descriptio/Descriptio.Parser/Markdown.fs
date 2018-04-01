@@ -1,37 +1,56 @@
 ﻿namespace Descriptio.Parser
 
-open System.IO
-open Core
-open Descriptio.Core.AST
+open System
+open System.Linq
+open Descriptio.Parser.Core
 
-module Markdown =
-    open System
+module public Markdown =
 
-    type public StringParser =
-        interface IParser<string> with
-            member this.Parse source =
-                raise <| NotImplementedException()
-    
-    type StackSymbols = Z0 | EmphasisStack
+    type public StackSymbols = Z0 | EmphasisStack | CodeBlockStart | CodeBlockStartLanguageChar of char
 
-    type State =
+    type public State =
     | NewLine
     | TextLine
+    | QuoteLine
+    | CodeBlock
 
-    type Token =
+    type public Token =
     | NewLineToken
     | EmphasisStartToken
     | EmphasisEndToken
-    | CharToken of char
+    | CodeBlockStartToken
+    | CodeBlockStartLanguageToken of language : string
+    | TextToken of string
 
-    type Rule = (char list * State * StackSymbols list * Token list) -> (char list * State * StackSymbols list * Token list) option
+    type public Rule = (char list * State * StackSymbols list * Token list) -> (char list * State * StackSymbols list * Token list) option
 
     let (++) list tail = List.append list [tail]
 
-    type public StreamParser() =
-        let rules : Rule list = [
+    let rules : Rule list = [
             (fun (input, state, stack, output) -> (match (input, state, stack) with ('\r'::'\n'::t, TextLine, [Z0]) -> Some(t, NewLine, stack, output++NewLineToken)| _ -> None));
             (fun (input, state, stack, output) -> (match (input, state, stack) with ('*'::'*'::t, TextLine, [Z0]) -> Some(t, TextLine, EmphasisStack::stack, output++EmphasisStartToken)| _ -> None));
             (fun (input, state, stack, output) -> (match (input, state, stack) with ('*'::'*'::t, TextLine, EmphasisStack::s) -> Some(t, TextLine, s, output++EmphasisEndToken)| _ -> None));
-            (fun (input, state, stack, output) -> (match (input, state, stack) with (c::t, TextLine, [Z0]) -> Some(t, TextLine, stack, output++CharToken c)| _ -> None))
+            (fun (input, state, stack, output) -> (match (input, state, stack) with ('`'::'`'::'`'::t, NewLine, [Z0]) -> Some(t, CodeBlock, CodeBlockStart::stack, output++CodeBlockStartToken) | _ -> None));
+            (fun (input, state, stack, output) -> (match (input, state, stack, output.Last()) with ('\r'::'\n'::_, CodeBlock, CodeBlockStartLanguageChar(c)::st, CodeBlockStartLanguageToken(l)) -> Some(input, CodeBlock, st, output.GetSlice(Some 0, Some <| output.Length - 2)++CodeBlockStartLanguageToken(l + c.ToString())) | _ -> None));
+            (fun (input, state, stack, output) -> (match (input, state, stack, output) with ('\r'::'\n'::_, CodeBlock, CodeBlockStartLanguageChar(c)::st, _) -> Some(input, CodeBlock, st, output++CodeBlockStartLanguageToken(c.ToString())) | _ -> None));
+            (fun (input, state, stack, output) -> (match (input, state, stack) with (h::t, CodeBlock, CodeBlockStart::_) -> Some(t, CodeBlock, CodeBlockStartLanguageChar(h)::stack, output) | _ -> None));
+            (fun (input, state, stack, output) -> (match (input, state, stack) with (c::t, TextLine, [Z0]) -> Some(t, TextLine, stack, output++TextToken(c.ToString()))| _ -> None));
         ]
+
+    type public TextLexer() =
+        let rec lexer (inp, state, stack, output) =
+            rules
+            |> List.map (fun r -> r(inp, state, stack, output))
+            |> List.filter Option.isSome
+            |> List.map (fun r1 -> r1.Value)
+            |> List.map lexer
+            |> List.fold (fun s res -> if Option.isSome res then res else s) None
+        
+        member public this.Lex input = (this :> ILexer<_, _>).Lex input
+        interface ILexer<string, (char list * State * StackSymbols list * Token list)> with
+            member __.Lex input = lexer ([for c in input -> c], NewLine, [Z0], [])
+
+    type public TextParser() =
+        member public this.Parse input = (this :> IParser<_>).Parse input
+        interface IParser<(char list * State * StackSymbols list * Token list)> with
+            member __.Parse input = raise <| NotImplementedException()

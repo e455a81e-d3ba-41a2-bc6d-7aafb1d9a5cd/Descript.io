@@ -9,11 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Descriptio.Core", "Descript
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{5652668B-3C03-4FC7-B6A6-F5303525DFD3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Desctiptio.Tests.IntegrationTests", "Tests\Desctiptio.Tests.IntegrationTests\Desctiptio.Tests.IntegrationTests.csproj", "{9A941ECF-D407-4FBA-A6E0-4410398B48D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Descriptio.Tests.IntegrationTests", "Tests\Descriptio.Tests.IntegrationTests\Descriptio.Tests.IntegrationTests.csproj", "{9A941ECF-D407-4FBA-A6E0-4410398B48D0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Descriptio.Tests.UnitTests", "Tests\Descriptio.Tests.UnitTests\Descriptio.Tests.UnitTests.csproj", "{3BB04557-CC69-43D0-9996-97DA28FED844}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Descriptio.Parser", "Descriptio.Parser\Descriptio.Parser.fsproj", "{250F578F-7D51-41B4-91DD-0B3F4C9BA4AB}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Descriptio.Parser", "Descriptio.Parser\Descriptio.Parser.fsproj", "{250F578F-7D51-41B4-91DD-0B3F4C9BA4AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

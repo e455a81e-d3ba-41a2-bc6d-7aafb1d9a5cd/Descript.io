@@ -5,9 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup Label="NuGetReferences">
+    <PackageReference Include="FluentAssertions" Version="5.2.0" />
     <PackageReference Include="xunit" Version="2.3.1" />
-    <PackageReference Include="xunit.analyzers" Version="0.8.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Descriptio.Core\Descriptio.Core.csproj" />
+    <ProjectReference Include="..\..\Descriptio.Parser\Descriptio.Parser.fsproj" />
+    <ProjectReference Include="..\..\Descriptio.Transform\Descriptio.Transform.csproj" />
   </ItemGroup>
 
 </Project>
