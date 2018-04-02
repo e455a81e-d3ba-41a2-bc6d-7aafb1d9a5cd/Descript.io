@@ -17,4 +17,8 @@
     <PackageTags>markdown transform document</PackageTags>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Collections.Immutable" Version="1.4.0" />
+  </ItemGroup>
+
 </Project>

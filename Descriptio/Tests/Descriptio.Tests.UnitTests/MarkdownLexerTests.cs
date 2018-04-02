@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Descriptio.Tests.UnitTests.Extensions;
+using Descriptio.Tests.FluentAssertionsExtensions;
 using FluentAssertions;
 using Xunit;
 

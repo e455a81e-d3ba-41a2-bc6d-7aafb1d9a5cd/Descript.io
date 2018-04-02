@@ -3,7 +3,7 @@ using FluentAssertions.Execution;
 using FluentAssertions.Primitives;
 using Microsoft.FSharp.Core;
 
-namespace Descriptio.Tests.UnitTests.Extensions
+namespace Descriptio.Tests.FluentAssertionsExtensions
 {
     public class FSharpOptionAssertions<T> : ReferenceTypeAssertions<FSharpOption<T>, FSharpOptionAssertions<T>>
     {
@@ -13,6 +13,16 @@ namespace Descriptio.Tests.UnitTests.Extensions
         }
 
         protected override string Identifier => nameof(FSharpOption<T>);
+
+        public AndConstraint<FSharpOptionAssertions<T>> Be(FSharpOption<T> expected, string because = "", params object[] becauseArgs)
+        {
+            Execute.Assertion
+                   .ForCondition(Subject?.Equals(expected) ?? ReferenceEquals(Subject, expected))
+                   .BecauseOf(because, becauseArgs)
+                   .FailWith($"Expected {expected}, but got {Subject}.");
+
+            return new AndConstraint<FSharpOptionAssertions<T>>(this);
+        }
 
         public AndConstraint<FSharpOptionAssertions<T>> BeSome(string because = "", params object[] becauseArgs)
         {

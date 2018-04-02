@@ -5,6 +5,7 @@ open System.Linq
 open Descriptio.Parser.Core
 
 module public MarkdownLexer =
+    open System
 
     type public StackSymbols =
     | Z0
@@ -34,8 +35,8 @@ module public MarkdownLexer =
 
     type public Rule = (char list * State * StackSymbols list * Token list) -> (char list * State * StackSymbols list * Token list) option
 
-    let (++) list tail = List.append list [tail]
-    let (+!+) (list : 'a list) last = list.GetSlice(Some 0, Some(list.Length - 2))++last
+    let inline (++) list tail = list@[tail]
+    let inline (+!+) (list : 'a list) last = list.GetSlice(Some 0, Some(list.Length - 2))++last
 
     let (|LineBreak|_|) (input : char list) =
         match input with
@@ -113,11 +114,11 @@ module public MarkdownLexer =
             rules
             |> List.map (fun r -> r(inp, state, stack, output))
             |> List.filter Option.isSome
-            |> List.map (fun r1 -> match r1.Value with
-                                   | ([], _, [Z0], _) -> r1
-                                   | _ -> lexer r1.Value)
+            |> List.map (fun r -> match r.Value with
+                                  | ([], _, [Z0], _) -> Some(r.Value |> TupleExtensions.ToValueTuple)
+                                  | _ -> lexer r.Value)
             |> List.fold (fun s res -> if Option.isSome s then s else res) None
         
         member public this.Lex input = (this :> ILexer<_, _>).Lex input
-        interface ILexer<string, (char list * State * StackSymbols list * Token list)> with
+        interface ILexer<string, struct(char list * State * StackSymbols list * Token list)> with
             member __.Lex input = lexer ([for c in input -> c], NewLine, [Z0], [])

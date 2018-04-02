@@ -1,4 +1,6 @@
-﻿namespace Descriptio.Core.AST
+﻿using System;
+
+namespace Descriptio.Core.AST
 {
     public interface IAbstractSyntaxTree
     {

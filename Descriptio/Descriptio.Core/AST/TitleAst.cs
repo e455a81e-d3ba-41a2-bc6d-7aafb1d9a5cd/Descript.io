@@ -2,7 +2,7 @@
 
 namespace Descriptio.Core.AST
 {
-    public class TitleAst : IAbstractSyntaxTreeBlock
+    public class TitleAst : IAbstractSyntaxTreeBlock, IEquatable<TitleAst>
     {
         public TitleAst(string text, int level = 1, IAbstractSyntaxTreeBlock next = null)
         {
@@ -23,5 +23,20 @@ namespace Descriptio.Core.AST
         public IAbstractSyntaxTreeBlock SetText(string text) => new TitleAst(text, Level, Next);
 
         public IAbstractSyntaxTreeBlock SetLevel(int level) => new TitleAst(Text, level, Next);
+
+        public bool Equals(TitleAst other) => !(other is null) && Text == other.Text && Level == other.Level;
+
+        public override bool Equals(object obj) => obj is TitleAst ast && Equals(ast);
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = (Next != null ? Next.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Text != null ? Text.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ Level;
+                return hashCode;
+            }
+        }
     }
 }

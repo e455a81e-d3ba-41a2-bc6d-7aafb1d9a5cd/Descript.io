@@ -2,7 +2,7 @@
 
 namespace Descriptio.Core.AST
 {
-    public abstract class TextInline
+    public abstract class TextInline : IAbstractSyntaxTreeInline
     {
         protected TextInline(string text)
         {
