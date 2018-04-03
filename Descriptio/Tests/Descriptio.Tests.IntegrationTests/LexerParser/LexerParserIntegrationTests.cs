@@ -31,6 +31,25 @@ This is a text.",
                         new CleanTextInline("This is a text.")
                     }))
             },
+            new object[]
+            {
+                @"# Title 1
+This is a text.
+**This should be strong.**
+*And this should be emphasized.*
+`This should be formatted as code.`",
+                new TitleAst(
+                    "Title 1",
+                    level: 1,
+                    next: new TextParagraphBlock(new TextInline[]
+                    {
+                        new CleanTextInline("This is a text. "),
+                        new StrongTextInline("This should be strong."),
+                        new CleanTextInline(" "),
+                        new EmphasisTextInline("And this should be emphasized."),
+                        new CodeTextInline("This should be formatted as code.")
+                    }))
+            },
         };
 
         [Theory(DisplayName = "Parsing process should yield simple document")]

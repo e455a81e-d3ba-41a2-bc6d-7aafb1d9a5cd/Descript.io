@@ -60,6 +60,60 @@ namespace Descriptio.Tests.UnitTests
                         new EmphasisTextInline("emphasized"),
                         new CleanTextInline(" text.")
                     })
+            },
+            new object[]
+            {
+                new[]
+                {
+                    Token.NewTextToken("This is a "),
+                    Token.StrongStartToken,
+                    Token.NewTextToken("strong"),
+                    Token.StrongEndToken,
+                    Token.NewTextToken(" text.")
+                },
+                new TextParagraphBlock(
+                    new IAbstractSyntaxTreeInline[]
+                    {
+                        new CleanTextInline("This is a "),
+                        new StrongTextInline("strong"),
+                        new CleanTextInline(" text.")
+                    })
+            },
+            new object[]
+            {
+                new[]
+                {
+                    Token.NewTextToken("This is a "),
+                    Token.InlineCodeStartToken,
+                    Token.NewTextToken("code inline"),
+                    Token.InlineCodeEndToken,
+                    Token.NewTextToken(" text.")
+                },
+                new TextParagraphBlock(
+                    new IAbstractSyntaxTreeInline[]
+                    {
+                        new CleanTextInline("This is a "),
+                        new CodeTextInline("code inline"),
+                        new CleanTextInline(" text.")
+                    })
+            },
+            new object[]
+            {
+                new[]
+                {
+                    Token.NewTextToken("This is a "),
+                    Token.InlineCodeStartToken,
+                    Token.NewTextToken("code`inline"),
+                    Token.InlineCodeEndToken,
+                    Token.NewTextToken(" text.")
+                },
+                new TextParagraphBlock(
+                    new IAbstractSyntaxTreeInline[]
+                    {
+                        new CleanTextInline("This is a "),
+                        new CodeTextInline("code`inline"),
+                        new CleanTextInline(" text.")
+                    })
             }
         };
 

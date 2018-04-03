@@ -56,10 +56,50 @@ module public MarkdownParser =
                     | _ -> None
             
                 ParseEmphasisStart inp |> ParseEmphasisText |> ParseEmphasisEnd
+        
+            let ParseStrong inp =
+                let ParseStrongStart i =
+                    match i with
+                    | StrongStartToken::t -> Some t
+                    | _ -> None
+
+                let ParseStrongText i =
+                    match i with
+                    | Some(TextToken(txt)::NewLineToken::TextToken(txt2)::t) -> Some(t, txt + " " + txt2)
+                    | Some(TextToken(txt)::t) -> Some(t, txt)
+                    | _ -> None
+            
+                let ParseStrongEnd par =
+                    match par with
+                    | Some(StrongEndToken::t, txt) -> Some(StrongTextInline(txt) :> IAbstractSyntaxTreeInline, t)
+                    | _ -> None
+            
+                inp |> ParseStrongStart |> ParseStrongText |> ParseStrongEnd
+        
+            let ParseInlineCode inp =
+                let ParseInlineCodeStart i =
+                    match i with
+                    | InlineCodeStartToken::t -> Some t
+                    | _ -> None
+
+                let ParseInlineCodeText i =
+                    match i with
+                    | Some(TextToken(txt)::NewLineToken::TextToken(txt2)::t) -> Some(t, txt + " " + txt2)
+                    | Some(TextToken(txt)::t) -> Some(t, txt)
+                    | _ -> None
+            
+                let ParseInlineCodeEnd par =
+                    match par with
+                    | Some(InlineCodeEndToken::t, txt) -> Some(CodeTextInline(txt) :> IAbstractSyntaxTreeInline, t)
+                    | _ -> None
+            
+                inp |> ParseInlineCodeStart |> ParseInlineCodeText |> ParseInlineCodeEnd
 
             let textParagraphRules = [
                     ParseCleanText;
+                    ParseStrong;
                     ParseEmphasis;
+                    ParseInlineCode;
                 ]
 
             textParagraphRules

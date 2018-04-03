@@ -5,29 +5,29 @@ open System.Linq
 open Descriptio.Parser.Core
 
 module public MarkdownLexer =
-    open System
 
     type public StackSymbols =
     | Z0
-    | EmphasisStack
-    | CodeBlockStart
-    | CodeBlockStartLanguageChar of char
+    | EmphasisStack of char
+    | StrongStack of char
+    | InlineCodeStack
+    | InlineCodeLiteralStack
 
     type public State =
     | NewLine
     | TextLine
-    | QuoteLine
     | TitleLevelState
     | TitleState
     | TitleClosingState
-    | CodeBlock
 
     type public Token =
     | NewLineToken
     | EmphasisStartToken
     | EmphasisEndToken
-    | CodeBlockStartToken
-    | CodeBlockStartLanguageToken of language : string
+    | StrongStartToken
+    | StrongEndToken
+    | InlineCodeStartToken
+    | InlineCodeEndToken
     | TitleLevelToken
     | TitleToken of string
     | TitleClosingToken
@@ -38,7 +38,7 @@ module public MarkdownLexer =
     let inline (++) list tail = list@[tail]
     let inline (+!+) (list : 'a list) last = list.GetSlice(Some 0, Some(list.Length - 2))++last
 
-    let (|LineBreak|_|) (input : char list) =
+    let (|LineBreak|_|) input =
         match input with
         | '\r'::'\n'::t
         | '\r'::t
@@ -81,15 +81,57 @@ module public MarkdownLexer =
                 | _ -> None
         ]
 
+    let inlineCodeRules : Rule list = [
+            fun (input, state, stack, output) ->
+                match (input, state, stack, output.LastOrDefault()) with
+                | ('`'::'`'::t, NewLine, [Z0], _)
+                | ('`'::'`'::t, TextLine, [Z0], _) -> Some(t, TextLine, InlineCodeLiteralStack::stack, output++InlineCodeStartToken)
+                | ('`'::'`'::t, TextLine, InlineCodeLiteralStack::s, _) -> Some(t, TextLine, s, output++InlineCodeEndToken)
+                | (LineBreak(t), TextLine, InlineCodeLiteralStack::_, TextToken txt) -> Some(t, TextLine, stack, output+!+TextToken(txt + " "))
+                | (c::t, TextLine, InlineCodeLiteralStack::_, TextToken txt) -> Some(t, TextLine, stack, output+!+TextToken(txt + c.ToString()))
+                | (c::t, TextLine, InlineCodeLiteralStack::_, _) -> Some(t, TextLine, stack, output++TextToken(c.ToString()))
+                | ('`'::t, NewLine, [Z0], _)
+                | ('`'::t, TextLine, [Z0], _) -> Some(t, TextLine, InlineCodeStack::stack, output++InlineCodeStartToken)
+                | ('`'::t, TextLine, InlineCodeStack::s, _) -> Some(t, TextLine, s, output++InlineCodeEndToken)
+                | (LineBreak(t), TextLine, InlineCodeStack::_, TextToken txt) -> Some(t, TextLine, stack, output+!+TextToken(txt + " "))
+                | (c::t, TextLine, InlineCodeStack::_, TextToken txt) -> Some(t, TextLine, stack, output+!+TextToken(txt + c.ToString()))
+                | (c::t, TextLine, InlineCodeStack::_, _) -> Some(t, TextLine, stack, output++TextToken(c.ToString()))
+                | _ -> None;
+        ]
+
+    let strongRules : Rule list = [
+            fun (input, state, stack, output) ->
+                match (input, state, stack, output.LastOrDefault()) with
+                | ('\\'::'*'::t, TextLine, [Z0], TextToken txt) -> Some(t, TextLine, stack, output+!+TextToken(txt + "*"))
+                | ('*'::' '::t, TextLine, [Z0], TextToken txt) -> Some(t, TextLine, stack, output+!+TextToken(txt + "* "))
+                | (' '::'*'::t, TextLine, [Z0], TextToken txt) -> Some(t, TextLine, stack, output+!+TextToken(txt + " *"))
+                | ('\\'::'_'::t, TextLine, [Z0], TextToken txt) -> Some(t, TextLine, stack, output+!+TextToken(txt + "_"))
+                | ('_'::' '::t, TextLine, [Z0], TextToken txt) -> Some(t, TextLine, stack, output+!+TextToken(txt + "* "))
+                | (' '::'_'::t, TextLine, [Z0], TextToken txt) -> Some(t, TextLine, stack, output+!+TextToken(txt + " *"))
+                | ('*'::'*'::t, NewLine, [Z0], _)
+                | ('*'::'*'::t, TextLine, [Z0], _) -> Some(t, TextLine, StrongStack('*')::stack, output++StrongStartToken)
+                | ('*'::'*'::t, TextLine, StrongStack('*')::s, _) -> Some(t, TextLine, s, output++StrongEndToken)
+                | ('_'::'_'::t, NewLine, [Z0], _)
+                | ('_'::'_'::t, TextLine, [Z0], _) -> Some(t, TextLine, StrongStack('_')::stack, output++StrongStartToken)
+                | ('_'::'_'::t, TextLine, StrongStack('_')::s, _) -> Some(t, TextLine, s, output++StrongEndToken)
+                | (LineBreak(t), TextLine, StrongStack(_)::_, TextToken txt) -> Some(t, TextLine, stack, output+!+TextToken(txt + " "))
+                | (c::t, TextLine, StrongStack(_)::_, TextToken txt) -> Some(t, TextLine, stack, output+!+TextToken(txt + c.ToString()))
+                | (c::t, TextLine, StrongStack(_)::_, _) -> Some(t, TextLine, stack, output++TextToken(c.ToString()))
+                | _ -> None;
+        ]
+
     let emphasisRules : Rule list = [
             fun (input, state, stack, output) ->
                 match (input, state, stack, output.LastOrDefault()) with
-                | ('*'::'*'::t, NewLine, [Z0], _)
-                | ('*'::'*'::t, TextLine, [Z0], _) -> Some(t, TextLine, EmphasisStack::stack, output++EmphasisStartToken)
-                | ('*'::'*'::t, TextLine, EmphasisStack::s, _) -> Some(t, TextLine, s, output++EmphasisEndToken)
-                | (LineBreak(t), TextLine, EmphasisStack::_, TextToken txt) -> Some(t, TextLine, stack, output+!+TextToken(txt + " "))
-                | (c::t, TextLine, EmphasisStack::_, TextToken txt) -> Some(t, TextLine, stack, output+!+TextToken(txt + c.ToString()))
-                | (c::t, TextLine, EmphasisStack::_, _) -> Some(t, TextLine, stack, output++TextToken(c.ToString()))
+                | ('*'::t, NewLine, [Z0], _)
+                | ('*'::t, TextLine, [Z0], _) -> Some(t, TextLine, EmphasisStack('*')::stack, output++EmphasisStartToken)
+                | ('*'::t, TextLine, EmphasisStack('*')::s, _) -> Some(t, TextLine, s, output++EmphasisEndToken)
+                | ('_'::t, NewLine, [Z0], _)
+                | ('_'::t, TextLine, [Z0], _) -> Some(t, TextLine, EmphasisStack('_')::stack, output++EmphasisStartToken)
+                | ('_'::t, TextLine, EmphasisStack('_')::s, _) -> Some(t, TextLine, s, output++EmphasisEndToken)
+                | (LineBreak(t), TextLine, EmphasisStack(_)::_, TextToken txt) -> Some(t, TextLine, stack, output+!+TextToken(txt + " "))
+                | (c::t, TextLine, EmphasisStack(_)::_, TextToken txt) -> Some(t, TextLine, stack, output+!+TextToken(txt + c.ToString()))
+                | (c::t, TextLine, EmphasisStack(_)::_, _) -> Some(t, TextLine, stack, output++TextToken(c.ToString()))
                 | _ -> None;
         ]
     
@@ -106,6 +148,8 @@ module public MarkdownLexer =
     let rules : Rule list =
         textLineRules
         |> List.append emphasisRules
+        |> List.append strongRules
+        |> List.append inlineCodeRules
         |> List.append blockRules
         |> List.append titleRules
 
