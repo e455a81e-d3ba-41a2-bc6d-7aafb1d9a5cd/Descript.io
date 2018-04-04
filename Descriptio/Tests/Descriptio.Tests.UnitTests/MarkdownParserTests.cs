@@ -17,9 +17,9 @@ namespace Descriptio.Tests.UnitTests
     {
         public static readonly IEnumerable<object[]> Parser_AtxTitle_ShouldReturnTitle_Data = new[]
         {
-            new object[]{ new[] { Token.TitleLevelToken, Token.NewTitleToken("Title 1") }, new TitleAst("Title 1", level: 1)},
-            new object[]{ new[] { Token.TitleLevelToken, Token.TitleLevelToken, Token.TitleLevelToken, Token.NewTitleToken("### Hello World!") }, new TitleAst("### Hello World!", level: 3)},
-            new object[]{ new[] { Token.TitleLevelToken, Token.NewTitleToken("Hello World!##"), Token.TitleClosingToken }, new TitleAst("Hello World!##", level: 1)},
+            new object[]{ new[] { Token.TitleLevelToken, Token.NewTitleToken("Title 1") }, new TitleAst(text: "Title 1")},
+            new object[]{ new[] { Token.TitleLevelToken, Token.TitleLevelToken, Token.TitleLevelToken, Token.NewTitleToken("### Hello World!") }, new TitleAst(text: "### Hello World!", level: 3)},
+            new object[]{ new[] { Token.TitleLevelToken, Token.NewTitleToken("Hello World!##"), Token.TitleClosingToken }, new TitleAst(text: "Hello World!##")},
         };
 
         [Theory(DisplayName = "Parser should parse ATX Title")]
@@ -113,6 +113,28 @@ namespace Descriptio.Tests.UnitTests
                         new CleanTextInline("This is a "),
                         new CodeTextInline("code`inline"),
                         new CleanTextInline(" text.")
+                    })
+            },
+            new object[]
+            {
+                new[]
+                {
+                    Token.NewTextToken("This is an "),
+                    Token.ImageAltStartToken,
+                    Token.NewTextToken("Alternative"),
+                    Token.ImageAltEndToken,
+                    Token.LinkStartToken,
+                    Token.NewTextToken(@"C:\Path\To\Image.jpg"),
+                    Token.NewTextToken("Some image"),
+                    Token.LinkEndToken,
+                    Token.NewTextToken(" image.")
+                },
+                new TextParagraphBlock(
+                    new IAbstractSyntaxTreeInline[]
+                    {
+                        new CleanTextInline("This is an "),
+                        new ImageInline(alt: "Alternative", src: @"C:\Path\To\Image.jpg", title: "Some image"),
+                        new CleanTextInline(" image.")
                     })
             }
         };

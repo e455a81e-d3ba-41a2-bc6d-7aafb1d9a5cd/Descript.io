@@ -138,13 +138,115 @@ namespace Descriptio.Tests.UnitTests
             new object[]{ "``Hello World!``", new[] { Token.InlineCodeStartToken, Token.NewTextToken("Hello World!"), Token.InlineCodeEndToken } },
             new object[]{ "``Hello\r\nWorld!``", new[] { Token.InlineCodeStartToken, Token.NewTextToken("Hello World!"), Token.InlineCodeEndToken } },
             new object[]{ "``Hello`World!``", new[] { Token.InlineCodeStartToken, Token.NewTextToken("Hello`World!"), Token.InlineCodeEndToken } },
-            new object[]{ "`Hello World!`", new[] {Token.InlineCodeStartToken, Token.NewTextToken("Hello World!"), Token.InlineCodeEndToken } },
+            new object[]{ "`Hello World!`", new[] { Token.InlineCodeStartToken, Token.NewTextToken("Hello World!"), Token.InlineCodeEndToken } },
             new object[]{ "`Hello\r\nWorld!`", new[] { Token.InlineCodeStartToken, Token.NewTextToken("Hello World!"), Token.InlineCodeEndToken } },
         };
 
         [Theory]
         [MemberData(nameof(Lexer_InlineCode_ShouldReturnInlineCodeTokens_Data))]
         public void Lexer_InlineCode_ShouldReturnInlineCodeTokens(string source, Token[] expectedTokens)
+        {
+            // Arrange
+            var lexer = new TextLexer();
+
+            // Act
+            var result = lexer.Lex(source);
+
+            // Assert
+            result.Should()
+                  .BeSome()
+                  .And.Subject.Value.Item4
+                  .Should<Token>()
+                  .Equal(expectedTokens);
+        }
+
+        // ![Alt text](/path/to/img.jpg "Optional title")
+        public static readonly IEnumerable<object[]> Lexer_Image_ShouldReturnImageTokens_Data = new[]
+        {
+            new object[]
+            {
+                "![Hello World](img.jpg)",
+                new[]
+                {
+                    Token.ImageAltStartToken,
+                    Token.NewTextToken("Hello World"),
+                    Token.ImageAltEndToken,
+                    Token.LinkStartToken,
+                    Token.NewTextToken("img.jpg"),
+                    Token.LinkEndToken
+                }
+            },
+            new object[]
+            {
+                @"![Hello World](img.jpg ""Title"")",
+                new[]
+                {
+                    Token.ImageAltStartToken,
+                    Token.NewTextToken("Hello World"),
+                    Token.ImageAltEndToken,
+                    Token.LinkStartToken,
+                    Token.NewTextToken("img.jpg"),
+                    Token.NewTextToken("Title"),
+                    Token.LinkEndToken
+
+                }
+            },
+        };
+
+        [Theory]
+        [MemberData(nameof(Lexer_Image_ShouldReturnImageTokens_Data))]
+        public void Lexer_Image_ShouldReturnImageTokens(string source, Token[] expectedTokens)
+        {
+            // Arrange
+            var lexer = new TextLexer();
+
+            // Act
+            var result = lexer.Lex(source);
+
+            // Assert
+            result.Should()
+                  .BeSome()
+                  .And.Subject.Value.Item4
+                  .Should<Token>()
+                  .Equal(expectedTokens);
+        }
+
+        // [text](/path/to/target "Optional title")
+        public static readonly IEnumerable<object[]> Lexer_Hyperlink_ShouldReturnImageTokens_Data = new[]
+        {
+            new object[]
+            {
+                "[Hello World](http://example.com)",
+                new[]
+                {
+                    Token.LinkTextStartToken,
+                    Token.NewTextToken("Hello World"),
+                    Token.LinkTextEndToken,
+                    Token.LinkStartToken,
+                    Token.NewTextToken("http://example.com"),
+                    Token.LinkEndToken
+                }
+            },
+            new object[]
+            {
+                @"[Hello World](http://example.com ""Example.com"")",
+                new[]
+                {
+                    Token.LinkTextStartToken,
+                    Token.NewTextToken("Hello World"),
+                    Token.LinkTextEndToken,
+                    Token.LinkStartToken,
+                    Token.NewTextToken("http://example.com"),
+                    Token.NewTextToken("Example.com"),
+                    Token.LinkEndToken
+
+                }
+            },
+        };
+
+        [Theory]
+        [MemberData(nameof(Lexer_Hyperlink_ShouldReturnImageTokens_Data))]
+        public void Lexer_Hyperlink_ShouldReturnImageTokens(string source, Token[] expectedTokens)
         {
             // Arrange
             var lexer = new TextLexer();

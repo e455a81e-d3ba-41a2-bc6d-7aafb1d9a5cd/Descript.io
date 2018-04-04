@@ -94,12 +94,29 @@ module public MarkdownParser =
                     | _ -> None
             
                 inp |> ParseInlineCodeStart |> ParseInlineCodeText |> ParseInlineCodeEnd
+        
+            let ParseImageInline inp =
+                let ParseImageInlineAlt i =
+                    match i with
+                    | ImageAltStartToken::TextToken(alt)::ImageAltEndToken::t -> Some(t, alt)
+                    | _ -> None
+
+                let ParseImageSrcTitleText i =
+                    match i with
+                    | Some(LinkStartToken::TextToken(src)::TextToken(title)::LinkEndToken::t, alt) ->
+                        Some(ImageInline(alt, src, title) :> IAbstractSyntaxTreeInline, t)
+                    | Some(LinkStartToken::TextToken(src)::LinkEndToken::t, alt) ->
+                        Some(ImageInline(alt, src) :> IAbstractSyntaxTreeInline, t)
+                    | _ -> None
+
+                inp |> ParseImageInlineAlt |> ParseImageSrcTitleText
 
             let textParagraphRules = [
                     ParseCleanText;
                     ParseStrong;
                     ParseEmphasis;
                     ParseInlineCode;
+                    ParseImageInline;
                 ]
 
             textParagraphRules

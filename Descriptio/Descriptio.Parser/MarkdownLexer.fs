@@ -12,6 +12,8 @@ module public MarkdownLexer =
     | StrongStack of char
     | InlineCodeStack
     | InlineCodeLiteralStack
+    | ImageStack
+    | HyperlinkStack
 
     type public State =
     | NewLine
@@ -19,6 +21,10 @@ module public MarkdownLexer =
     | TitleLevelState
     | TitleState
     | TitleClosingState
+    | ImageAltState
+    | HyperlinkTextState
+    | LinkState
+    | LinkTitleState
 
     type public Token =
     | NewLineToken
@@ -32,6 +38,13 @@ module public MarkdownLexer =
     | TitleToken of string
     | TitleClosingToken
     | TextToken of string
+    | ImageAltStartToken
+    | ImageAltEndToken
+    | LinkTextStartToken
+    | LinkTextEndToken
+    | LinkStartToken
+    | LinkEndToken
+
 
     type public Rule = (char list * State * StackSymbols list * Token list) -> (char list * State * StackSymbols list * Token list) option
 
@@ -79,6 +92,45 @@ module public MarkdownLexer =
                 | (LineBreak(LineBreak t), TextLine, [Z0]) -> Some(t, NewLine, stack, output++NewLineToken)
                 | (LineBreak(LineBreak t), NewLine, [Z0]) -> Some(t, NewLine, stack, output++NewLineToken)
                 | _ -> None
+        ]
+
+    let imageHyperlinkRules : Rule list = [
+            fun (input, state, stack, output) ->
+                match (input, state, stack, output.LastOrDefault()) with
+                | ('!'::'['::t, TextLine, [Z0], _)
+                | ('!'::'['::t, NewLine, [Z0], _) -> Some(t, ImageAltState, ImageStack::stack, output++ImageAltStartToken)
+
+                | ('['::t, TextLine, [Z0], _)
+                | ('['::t, NewLine, [Z0], _) -> Some(t, HyperlinkTextState, HyperlinkStack::stack, output++LinkTextStartToken)
+
+                | (']'::'('::t, ImageAltState, ImageStack::_, _) -> Some(t, LinkState, stack, output++ImageAltEndToken++LinkStartToken)
+                | (']'::'('::t, HyperlinkTextState, HyperlinkStack::_, _) -> Some(t, LinkState, stack, output++LinkTextEndToken++LinkStartToken)
+
+                | (c::t, ImageAltState, ImageStack::_, TextToken(txt))
+                | (c::t, HyperlinkTextState, HyperlinkStack::_, TextToken(txt)) -> Some(t, state, stack, output+!+TextToken(txt + c.ToString()))
+                | (c::t, ImageAltState, ImageStack::_, _)
+                | (c::t, HyperlinkTextState, HyperlinkStack::_, _) -> Some(t, state, stack, output++TextToken(c.ToString()))
+ 
+                | ('"'::')'::t, LinkTitleState, ImageStack::st, _)
+                | (')'::t, LinkState, ImageStack::st, _)
+                | ('"'::')'::t, LinkTitleState, HyperlinkStack::st, _)
+                | (')'::t, LinkState, HyperlinkStack::st, _) -> Some(t, TextLine, st, output++LinkEndToken)
+
+                | (' '::'"'::t, LinkState, ImageStack::_, _) -> Some(t, LinkTitleState, stack, output++TextToken(""))
+                | (' '::'"'::t, LinkState, HyperlinkStack::_, _) -> Some(t, LinkTitleState, stack, output++TextToken(""))
+                | (c::t, LinkState, ImageStack::_, TextToken(txt))
+                | (c::t, LinkState, HyperlinkStack::_, TextToken(txt)) -> Some(t, LinkState, stack, output+!+TextToken(txt + c.ToString()))
+
+                | (c::t, LinkState, ImageStack::_, _)
+                | (c::t, LinkState, HyperlinkStack::_, _) -> Some(t, LinkState, stack, output++TextToken(c.ToString()))
+
+                | (c::t, LinkTitleState, ImageStack::_, TextToken(txt))
+                | (c::t, LinkTitleState, HyperlinkStack::_, TextToken(txt)) -> Some(t, LinkTitleState, stack, output+!+TextToken(txt + c.ToString()))
+
+                | (c::t, LinkTitleState, ImageStack::_, _)
+                | (c::t, LinkTitleState, HyperlinkStack::_, _) -> Some(t, LinkTitleState, stack, output++TextToken(c.ToString()))
+
+                | _ -> None;
         ]
 
     let inlineCodeRules : Rule list = [
@@ -150,6 +202,7 @@ module public MarkdownLexer =
         |> List.append emphasisRules
         |> List.append strongRules
         |> List.append inlineCodeRules
+        |> List.append imageHyperlinkRules
         |> List.append blockRules
         |> List.append titleRules
 
