@@ -221,4 +221,4 @@ module public MarkdownLexer =
         
         member public this.Lex input = (this :> ILexer<_, _>).Lex input
         interface ILexer<string, struct(char list * State * StackSymbols list * Token list)> with
-            member __.Lex input = lexer ([for c in input -> c], NewLine, [Z0], [])
+            member __.Lex input = lexer (input.ToCharArray() |> Array.toList, NewLine, [Z0], [])
