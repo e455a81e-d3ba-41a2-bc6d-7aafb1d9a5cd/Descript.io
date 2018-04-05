@@ -18,7 +18,7 @@ namespace Descriptio.Tests.IntegrationTests.LexerParser
     {
         public static readonly IEnumerable<object[]> LexerParser_string_ShouldYieldDocument_Data = new[]
         {
-            new object[] {"# Title 1", new TitleAst("Title 1", level: 1)},
+            new object[] { "# Title 1", new TitleAst("Title 1", level: 1) },
             new object[]
             {
                 @"# Title 1
@@ -26,10 +26,11 @@ This is a text.",
                 new TitleAst(
                     "Title 1",
                     level: 1,
-                    next: new TextParagraphBlock(new[]
-                    {
-                        new CleanTextInline("This is a text.")
-                    }))
+                    next: new TextParagraphBlock(
+                        new[]
+                        {
+                            new CleanTextInline("This is a text.")
+                        }))
             },
             new object[]
             {
@@ -37,18 +38,30 @@ This is a text.",
 This is a text.
 **This should be strong.**
 *And this should be emphasized.*
-`This should be formatted as code.`",
+`This should be formatted as code.`
+
+Here, we should have a new paragraph
+[with a link](http://example.com ""It is a title"")
+and an image ![Alt](C:\Path\To\An\Image.jpg, ""It has a title too"")",
                 new TitleAst(
                     "Title 1",
                     level: 1,
-                    next: new TextParagraphBlock(new TextInline[]
-                    {
-                        new CleanTextInline("This is a text. "),
-                        new StrongTextInline("This should be strong."),
-                        new CleanTextInline(" "),
-                        new EmphasisTextInline("And this should be emphasized."),
-                        new CodeTextInline("This should be formatted as code.")
-                    }))
+                    next: new TextParagraphBlock(
+                        new IAbstractSyntaxTreeInline[]
+                        {
+                            new CleanTextInline("This is a text. "),
+                            new StrongTextInline("This should be strong."),
+                            new CleanTextInline(" "),
+                            new EmphasisTextInline("And this should be emphasized."),
+                            new CodeTextInline("This should be formatted as code.")
+                        },
+                        next: new TextParagraphBlock(
+                            new IAbstractSyntaxTreeInline[]
+                            {
+                                new CleanTextInline("Here, we should have a new paragraph "),
+                                new HyperlinkInline(text: "with a link", href: "http://example.com", title: "It is a title"),
+                                new ImageInline(alt: "Alt", src: @"C:\Path\To\An\Image.jpg", title: "It has a title too"),
+                            })))
             },
         };
 

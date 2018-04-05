@@ -72,7 +72,10 @@ module public MarkdownLexer =
                 | (' '::'#'::t, TitleState, [Z0])
                 | ('#'::t, TitleState, [Z0]) -> Some(t, TitleClosingState, stack, output++TitleClosingToken)
                 | _ -> None;
-            fun (input, state, stack, output) -> match (input, state, stack) with ('#'::t, TitleClosingState, [Z0]) -> Some(t, TitleClosingState, stack, output++TitleClosingToken)| _ -> None;
+            fun (input, state, stack, output) ->
+                match (input, state, stack) with
+                | ('#'::t, TitleClosingState, [Z0]) -> Some(t, TitleClosingState, stack, output++TitleClosingToken)
+                | _ -> None;
             fun (input, state, stack, output) ->
                 match (input, state, stack) with
                 | (LineBreak(t), TitleState, [Z0])

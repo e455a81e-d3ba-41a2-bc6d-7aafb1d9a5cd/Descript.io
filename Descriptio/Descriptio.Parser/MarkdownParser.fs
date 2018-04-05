@@ -1,7 +1,5 @@
 ﻿namespace Descriptio.Parser
 
-open System
-open System.Linq
 open Descriptio.Core.AST
 open Descriptio.Parser.Core
 open Descriptio.Parser.MarkdownLexer
@@ -34,7 +32,6 @@ module public MarkdownParser =
         let ParseInline input =
             let ParseCleanText inp =
                 match inp with
-                | TextToken(txt)::NewLineToken::TextToken(txt2)::t -> Some(CleanTextInline(txt + " " + txt2) :> IAbstractSyntaxTreeInline, t)
                 | TextToken(txt)::t -> Some(CleanTextInline(txt) :> IAbstractSyntaxTreeInline, t)
                 | _ -> None
         
@@ -46,7 +43,6 @@ module public MarkdownParser =
 
                 let ParseEmphasisText i =
                     match i with
-                    | Some(TextToken(txt)::NewLineToken::TextToken(txt2)::t) -> Some(t, txt + " " + txt2)
                     | Some(TextToken(txt)::t) -> Some(t, txt)
                     | _ -> None
             
@@ -65,7 +61,6 @@ module public MarkdownParser =
 
                 let ParseStrongText i =
                     match i with
-                    | Some(TextToken(txt)::NewLineToken::TextToken(txt2)::t) -> Some(t, txt + " " + txt2)
                     | Some(TextToken(txt)::t) -> Some(t, txt)
                     | _ -> None
             
@@ -84,7 +79,6 @@ module public MarkdownParser =
 
                 let ParseInlineCodeText i =
                     match i with
-                    | Some(TextToken(txt)::NewLineToken::TextToken(txt2)::t) -> Some(t, txt + " " + txt2)
                     | Some(TextToken(txt)::t) -> Some(t, txt)
                     | _ -> None
             
@@ -110,6 +104,22 @@ module public MarkdownParser =
                     | _ -> None
 
                 inp |> ParseImageInlineAlt |> ParseImageSrcTitleText
+            
+            let ParseHyperlinkInline inp = 
+                let ParseHyperlinkText i =
+                    match i with
+                    | LinkTextStartToken::TextToken(text)::LinkTextEndToken::t -> Some(t, text)
+                    | _ -> None
+                
+                let ParseHyperlinkHrefTitle i =
+                    match i with
+                    | Some(LinkStartToken::TextToken(href)::TextToken(title)::LinkEndToken::t, text) ->
+                        Some(HyperlinkInline(text, href, title) :> IAbstractSyntaxTreeInline, t)
+                    | Some(LinkStartToken::TextToken(href)::LinkEndToken::t, text) ->
+                        Some(HyperlinkInline(text, href) :> IAbstractSyntaxTreeInline, t)
+                    | _ -> None
+                
+                inp |> ParseHyperlinkText |> ParseHyperlinkHrefTitle
 
             let textParagraphRules = [
                     ParseCleanText;
@@ -117,6 +127,7 @@ module public MarkdownParser =
                     ParseEmphasis;
                     ParseInlineCode;
                     ParseImageInline;
+                    ParseHyperlinkInline;
                 ]
 
             textParagraphRules
@@ -127,7 +138,7 @@ module public MarkdownParser =
         let rec Parse input =
             match ParseInline input with
             | Some (ast, []) -> Some ([ast], [])
-            | Some (ast, NewLineToken::NewLineToken::t) -> Some ([ast], t)
+            | Some (ast, NewLineToken::t) -> Some ([ast], t)
             | Some (ast, tokens) ->
                 let nextOption = Parse tokens
                 match nextOption with

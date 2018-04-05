@@ -136,6 +136,26 @@ namespace Descriptio.Tests.UnitTests
                         new ImageInline(alt: "Alternative", src: @"C:\Path\To\Image.jpg", title: "Some image"),
                         new CleanTextInline(" image.")
                     })
+            },
+            new object[]
+            {
+                new[]
+                {
+                    Token.NewTextToken("This is a "),
+                    Token.LinkTextStartToken,
+                    Token.NewTextToken("hyperlink."),
+                    Token.LinkTextEndToken,
+                    Token.LinkStartToken,
+                    Token.NewTextToken(@"http://example.com"),
+                    Token.NewTextToken("Hyperlink title"),
+                    Token.LinkEndToken,
+                },
+                new TextParagraphBlock(
+                    new IAbstractSyntaxTreeInline[]
+                    {
+                        new CleanTextInline("This is a "),
+                        new HyperlinkInline(text: "hyperlink.", href: @"http://example.com", title: "Hyperlink title"),
+                    })
             }
         };
 
