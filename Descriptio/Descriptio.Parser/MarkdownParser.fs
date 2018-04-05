@@ -27,131 +27,159 @@ module public MarkdownParser =
             | _ -> None
 
         (input, 1) ||> ParseTitleLevelTokens |> ParseTitleToken |> ParseTitleClosingTokens
+
+    let ParseInline input =
+        let ParseCleanText inp =
+            match inp with
+            | TextToken(txt)::t -> Some(CleanTextInline(txt) :> IAbstractSyntaxTreeInline, t)
+            | _ -> None
+        
+        let ParseEmphasis inp =
+            let ParseEmphasisStart i =
+                match i with
+                | EmphasisStartToken::t -> Some t
+                | _ -> None
+
+            let ParseEmphasisText i =
+                match i with
+                | Some(TextToken(txt)::t) -> Some(t, txt)
+                | _ -> None
+            
+            let ParseEmphasisEnd par =
+                match par with
+                | Some(EmphasisEndToken::t, txt) -> Some(EmphasisTextInline(txt) :> IAbstractSyntaxTreeInline, t)
+                | _ -> None
+            
+            ParseEmphasisStart inp |> ParseEmphasisText |> ParseEmphasisEnd
+        
+        let ParseStrong inp =
+            let ParseStrongStart i =
+                match i with
+                | StrongStartToken::t -> Some t
+                | _ -> None
+
+            let ParseStrongText i =
+                match i with
+                | Some(TextToken(txt)::t) -> Some(t, txt)
+                | _ -> None
+            
+            let ParseStrongEnd par =
+                match par with
+                | Some(StrongEndToken::t, txt) -> Some(StrongTextInline(txt) :> IAbstractSyntaxTreeInline, t)
+                | _ -> None
+            
+            inp |> ParseStrongStart |> ParseStrongText |> ParseStrongEnd
+        
+        let ParseInlineCode inp =
+            let ParseInlineCodeStart i =
+                match i with
+                | InlineCodeStartToken::t -> Some t
+                | _ -> None
+
+            let ParseInlineCodeText i =
+                match i with
+                | Some(TextToken(txt)::t) -> Some(t, txt)
+                | _ -> None
+            
+            let ParseInlineCodeEnd par =
+                match par with
+                | Some(InlineCodeEndToken::t, txt) -> Some(CodeTextInline(txt) :> IAbstractSyntaxTreeInline, t)
+                | _ -> None
+            
+            inp |> ParseInlineCodeStart |> ParseInlineCodeText |> ParseInlineCodeEnd
+        
+        let ParseImageInline inp =
+            let ParseImageInlineAlt i =
+                match i with
+                | ImageAltStartToken::TextToken(alt)::ImageAltEndToken::t -> Some(t, alt)
+                | _ -> None
+
+            let ParseImageSrcTitleText i =
+                match i with
+                | Some(LinkStartToken::TextToken(src)::TextToken(title)::LinkEndToken::t, alt) ->
+                    Some(ImageInline(alt, src, title) :> IAbstractSyntaxTreeInline, t)
+                | Some(LinkStartToken::TextToken(src)::LinkEndToken::t, alt) ->
+                    Some(ImageInline(alt, src) :> IAbstractSyntaxTreeInline, t)
+                | _ -> None
+
+            inp |> ParseImageInlineAlt |> ParseImageSrcTitleText
+            
+        let ParseHyperlinkInline inp = 
+            let ParseHyperlinkText i =
+                match i with
+                | LinkTextStartToken::TextToken(text)::LinkTextEndToken::t -> Some(t, text)
+                | _ -> None
+                
+            let ParseHyperlinkHrefTitle i =
+                match i with
+                | Some(LinkStartToken::TextToken(href)::TextToken(title)::LinkEndToken::t, text) ->
+                    Some(HyperlinkInline(text, href, title) :> IAbstractSyntaxTreeInline, t)
+                | Some(LinkStartToken::TextToken(href)::LinkEndToken::t, text) ->
+                    Some(HyperlinkInline(text, href) :> IAbstractSyntaxTreeInline, t)
+                | _ -> None
+                
+            inp |> ParseHyperlinkText |> ParseHyperlinkHrefTitle
+
+        let textParagraphRules = [
+                ParseCleanText;
+                ParseStrong;
+                ParseEmphasis;
+                ParseInlineCode;
+                ParseImageInline;
+                ParseHyperlinkInline;
+            ]
+
+        textParagraphRules
+        |> Seq.map (fun r -> r(input))
+        |> Seq.filter Option.isSome
+        |> Seq.fold (fun acc r -> if Option.isSome acc then acc else r) None
+
+    let rec ParseInlineRec lineDelimiter keepDelimiter input =
+        match ParseInline input with
+        | Some (ast, []) -> Some ([ast], [])
+        | Some (ast, d::t) when lineDelimiter d -> Some ([ast], if keepDelimiter then d::t else t)
+        | Some (ast, tokens) ->
+            let nextOption = ParseInlineRec lineDelimiter keepDelimiter tokens
+            match nextOption with
+            | Some (nexts, t) -> Some (ast::nexts, t)
+            | None -> Some ([ast], tokens)
+        | None -> None
+        
     
     let ParseTextParagraph input =
-        let ParseInline input =
-            let ParseCleanText inp =
-                match inp with
-                | TextToken(txt)::t -> Some(CleanTextInline(txt) :> IAbstractSyntaxTreeInline, t)
-                | _ -> None
-        
-            let ParseEmphasis inp =
-                let ParseEmphasisStart i =
-                    match i with
-                    | EmphasisStartToken::t -> Some t
-                    | _ -> None
-
-                let ParseEmphasisText i =
-                    match i with
-                    | Some(TextToken(txt)::t) -> Some(t, txt)
-                    | _ -> None
-            
-                let ParseEmphasisEnd par =
-                    match par with
-                    | Some(EmphasisEndToken::t, txt) -> Some(EmphasisTextInline(txt) :> IAbstractSyntaxTreeInline, t)
-                    | _ -> None
-            
-                ParseEmphasisStart inp |> ParseEmphasisText |> ParseEmphasisEnd
-        
-            let ParseStrong inp =
-                let ParseStrongStart i =
-                    match i with
-                    | StrongStartToken::t -> Some t
-                    | _ -> None
-
-                let ParseStrongText i =
-                    match i with
-                    | Some(TextToken(txt)::t) -> Some(t, txt)
-                    | _ -> None
-            
-                let ParseStrongEnd par =
-                    match par with
-                    | Some(StrongEndToken::t, txt) -> Some(StrongTextInline(txt) :> IAbstractSyntaxTreeInline, t)
-                    | _ -> None
-            
-                inp |> ParseStrongStart |> ParseStrongText |> ParseStrongEnd
-        
-            let ParseInlineCode inp =
-                let ParseInlineCodeStart i =
-                    match i with
-                    | InlineCodeStartToken::t -> Some t
-                    | _ -> None
-
-                let ParseInlineCodeText i =
-                    match i with
-                    | Some(TextToken(txt)::t) -> Some(t, txt)
-                    | _ -> None
-            
-                let ParseInlineCodeEnd par =
-                    match par with
-                    | Some(InlineCodeEndToken::t, txt) -> Some(CodeTextInline(txt) :> IAbstractSyntaxTreeInline, t)
-                    | _ -> None
-            
-                inp |> ParseInlineCodeStart |> ParseInlineCodeText |> ParseInlineCodeEnd
-        
-            let ParseImageInline inp =
-                let ParseImageInlineAlt i =
-                    match i with
-                    | ImageAltStartToken::TextToken(alt)::ImageAltEndToken::t -> Some(t, alt)
-                    | _ -> None
-
-                let ParseImageSrcTitleText i =
-                    match i with
-                    | Some(LinkStartToken::TextToken(src)::TextToken(title)::LinkEndToken::t, alt) ->
-                        Some(ImageInline(alt, src, title) :> IAbstractSyntaxTreeInline, t)
-                    | Some(LinkStartToken::TextToken(src)::LinkEndToken::t, alt) ->
-                        Some(ImageInline(alt, src) :> IAbstractSyntaxTreeInline, t)
-                    | _ -> None
-
-                inp |> ParseImageInlineAlt |> ParseImageSrcTitleText
-            
-            let ParseHyperlinkInline inp = 
-                let ParseHyperlinkText i =
-                    match i with
-                    | LinkTextStartToken::TextToken(text)::LinkTextEndToken::t -> Some(t, text)
-                    | _ -> None
-                
-                let ParseHyperlinkHrefTitle i =
-                    match i with
-                    | Some(LinkStartToken::TextToken(href)::TextToken(title)::LinkEndToken::t, text) ->
-                        Some(HyperlinkInline(text, href, title) :> IAbstractSyntaxTreeInline, t)
-                    | Some(LinkStartToken::TextToken(href)::LinkEndToken::t, text) ->
-                        Some(HyperlinkInline(text, href) :> IAbstractSyntaxTreeInline, t)
-                    | _ -> None
-                
-                inp |> ParseHyperlinkText |> ParseHyperlinkHrefTitle
-
-            let textParagraphRules = [
-                    ParseCleanText;
-                    ParseStrong;
-                    ParseEmphasis;
-                    ParseInlineCode;
-                    ParseImageInline;
-                    ParseHyperlinkInline;
-                ]
-
-            textParagraphRules
-            |> Seq.map (fun r -> r(input))
-            |> Seq.filter Option.isSome
-            |> Seq.fold (fun acc r -> if Option.isSome acc then acc else r) None
-
-        let rec Parse input =
-            match ParseInline input with
-            | Some (ast, []) -> Some ([ast], [])
-            | Some (ast, NewLineToken::t) -> Some ([ast], t)
-            | Some (ast, tokens) ->
-                let nextOption = Parse tokens
-                match nextOption with
-                | Some (nexts, t) -> Some (ast::nexts, t)
-                | None -> Some ([ast], tokens)
-            | None -> None
-        
-        match Parse input with
+        match ParseInlineRec ((=) NewLineToken) false input with
         | Some (asts, t) -> Some(TextParagraphBlock(asts) :> IAbstractSyntaxTreeBlock, t)
+        | _ -> None
+    
+    let ParseEnumeration input =
+        let rec ParseEnumerationItems input =
+            let ParseEnumerationToken input =
+                match input with
+                | EnumerationToken(num)::t -> Some(num, t)
+                | _ -> None
+            
+            match ParseEnumerationToken input with
+            | None -> None
+            | Some(num, inp) ->
+                let inlinesOption = ParseInlineRec (fun t -> match t with EnumerationToken(_) | NewLineToken -> true | _ -> false) true inp
+
+                match inlinesOption with
+                | Some (asts, []) -> Some([EnumerationItem(num, asts)], [])
+                | Some (asts, NewLineToken::t) -> Some([EnumerationItem(num, asts)], t)
+                | Some (asts, EnumerationToken(n)::t) ->
+                    let nextOption = ParseEnumerationItems (EnumerationToken(n)::t)
+                    match nextOption with
+                    | Some (next, t) -> Some(EnumerationItem(num, asts)::next, t)
+                    | _ -> None
+                | _ -> None
+
+        match ParseEnumerationItems input with
+        | Some (asts, t) -> Some(EnumerationBlock(asts) :> IAbstractSyntaxTreeBlock, t)
         | _ -> None
 
     let rules : (Token list -> (IAbstractSyntaxTreeBlock * Token list) option) list = [
             ParseAtxTitle;
+            ParseEnumeration;
             ParseTextParagraph;
         ]
 

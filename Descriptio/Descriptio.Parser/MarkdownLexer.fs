@@ -25,6 +25,7 @@ module public MarkdownLexer =
     | HyperlinkTextState
     | LinkState
     | LinkTitleState
+    | EnumerationState
 
     type public Token =
     | NewLineToken
@@ -44,6 +45,7 @@ module public MarkdownLexer =
     | LinkTextEndToken
     | LinkStartToken
     | LinkEndToken
+    | EnumerationToken of int
 
 
     type public Rule = (char list * State * StackSymbols list * Token list) -> (char list * State * StackSymbols list * Token list) option
@@ -57,6 +59,17 @@ module public MarkdownLexer =
         | '\r'::t
         | '\n'::t -> Some t
         | _ -> None
+
+    let (|IntNumber|_|) input =
+        let rec GetIntNumber (input : char list) (digits : string) =
+            match (input, digits) with
+            | ([], "") -> None
+            | ([], _) -> Some(digits |> Int32.Parse, [])
+            | (delimiter::t, "") when delimiter |> Char.IsDigit |> not -> None
+            | (delimiter::t, d) when delimiter |> Char.IsDigit |> not -> Some(digits |> Int32.Parse, input)
+            | (digit::t, _) -> GetIntNumber t (digits + digit.ToString())
+        
+        GetIntNumber input ""
 
     let titleRules : Rule list = [
             fun (input, state, stack, output) ->
@@ -88,13 +101,24 @@ module public MarkdownLexer =
                 | (c::t, TitleState, [Z0], TitleLevelToken) -> Some(t, TitleState, stack, output++TitleToken(c.ToString()))
                 | _ -> None;
         ]
+    
+    let enumerationRules : Rule list = [
+            fun (input, state, stack, output) ->
+                match (input, state, stack, output.LastOrDefault()) with
+                | (IntNumber(num, '.'::' '::t), NewLine, [Z0], _)
+                | (LineBreak(IntNumber(num, '.'::' '::t)), EnumerationState, [Z0], _) -> Some(t, EnumerationState, stack, output++EnumerationToken(num))
+                | (LineBreak(LineBreak(t)), EnumerationState, [Z0], _) -> Some(t, NewLine, stack, output++NewLineToken)
+                | (c::t, EnumerationState, [Z0], TextToken(txt)) -> Some(t, EnumerationState, [Z0], output+!+TextToken(txt + c.ToString()))
+                | (c::t, EnumerationState, [Z0], _) -> Some(t, EnumerationState, [Z0], output++TextToken(c.ToString()))
+                | _ -> None;
+        ]
 
     let blockRules : Rule list = [
             fun (input, state, stack, output) ->
                 match (input, state, stack) with
                 | (LineBreak(LineBreak t), TextLine, [Z0]) -> Some(t, NewLine, stack, output++NewLineToken)
                 | (LineBreak(LineBreak t), NewLine, [Z0]) -> Some(t, NewLine, stack, output++NewLineToken)
-                | _ -> None
+                | _ -> None;
         ]
 
     let imageHyperlinkRules : Rule list = [
@@ -207,6 +231,7 @@ module public MarkdownLexer =
         |> List.append inlineCodeRules
         |> List.append imageHyperlinkRules
         |> List.append blockRules
+        |> List.append enumerationRules
         |> List.append titleRules
 
     type public TextLexer() =

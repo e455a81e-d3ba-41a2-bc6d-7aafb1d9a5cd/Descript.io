@@ -172,5 +172,49 @@ namespace Descriptio.Tests.UnitTests
             // Assert
             result.Should().Be(expected);
         }
+
+        public static readonly IEnumerable<object[]> Parser_Enumeration_ShouldReturnEnumeration_Data = new[]
+        {
+            new object[]
+            {
+                new[]
+                {
+                    Token.NewEnumerationToken(1),
+                    Token.NewTextToken("Hello World!"),
+                    Token.NewEnumerationToken(2),
+                    Token.NewTextToken("Second point.")
+                },
+                new EnumerationBlock(
+                    items: new []
+                    {
+                        new EnumerationItem(
+                            number: 1,
+                            inlines: new[]
+                            {
+                                new CleanTextInline("Hello World!")
+                            }),
+                        new EnumerationItem(
+                            number: 2,
+                            inlines: new[]
+                            {
+                                new CleanTextInline("Second point.")
+                            }),
+                    })
+            },
+        };
+
+        [Theory(DisplayName = "Parser should parse enumeration")]
+        [MemberData(nameof(Parser_Enumeration_ShouldReturnEnumeration_Data))]
+        public void Parser_Enumeration_ShouldReturnEnumeration(Token[] source, FSharpOption<IAbstractSyntaxTree> expected)
+        {
+            // Arrange
+            var parser = new MarkdownParser.MarkdownParser();
+
+            // Act
+            var result = parser.Parse(source);
+
+            // Assert
+            result.Should().Be(expected);
+        }
     }
 }

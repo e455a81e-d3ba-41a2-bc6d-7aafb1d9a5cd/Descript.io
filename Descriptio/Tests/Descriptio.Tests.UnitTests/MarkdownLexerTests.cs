@@ -159,8 +159,7 @@ namespace Descriptio.Tests.UnitTests
                   .Should<Token>()
                   .Equal(expectedTokens);
         }
-
-        // ![Alt text](/path/to/img.jpg "Optional title")
+        
         public static readonly IEnumerable<object[]> Lexer_Image_ShouldReturnImageTokens_Data = new[]
         {
             new object[]
@@ -210,8 +209,7 @@ namespace Descriptio.Tests.UnitTests
                   .Should<Token>()
                   .Equal(expectedTokens);
         }
-
-        // [text](/path/to/target "Optional title")
+        
         public static readonly IEnumerable<object[]> Lexer_Hyperlink_ShouldReturnImageTokens_Data = new[]
         {
             new object[]
@@ -247,6 +245,52 @@ namespace Descriptio.Tests.UnitTests
         [Theory]
         [MemberData(nameof(Lexer_Hyperlink_ShouldReturnImageTokens_Data))]
         public void Lexer_Hyperlink_ShouldReturnImageTokens(string source, Token[] expectedTokens)
+        {
+            // Arrange
+            var lexer = new TextLexer();
+
+            // Act
+            var result = lexer.Lex(source);
+
+            // Assert
+            result.Should()
+                  .BeSome()
+                  .And.Subject.Value.Item4
+                  .Should<Token>()
+                  .Equal(expectedTokens);
+        }
+        
+        public static readonly IEnumerable<object[]> Lexer_Enumeration_ShouldReturnEnumerationTokens_Data = new[]
+        {
+            new object[]
+            {
+                "1. abc",
+                new[]
+                {
+                    Token.NewEnumerationToken(1),
+                    Token.NewTextToken("abc"),
+                }
+            },
+            new object[]
+            {
+                @"3. def
+1. test
+214781. test",
+                new[]
+                {
+                    Token.NewEnumerationToken(3),
+                    Token.NewTextToken("def"),
+                    Token.NewEnumerationToken(1),
+                    Token.NewTextToken("test"),
+                    Token.NewEnumerationToken(214781),
+                    Token.NewTextToken("test"),
+                }
+            },
+        };
+
+        [Theory]
+        [MemberData(nameof(Lexer_Enumeration_ShouldReturnEnumerationTokens_Data))]
+        public void Lexer_Enumeration_ShouldReturnEnumerationTokens(string source, Token[] expectedTokens)
         {
             // Arrange
             var lexer = new TextLexer();
