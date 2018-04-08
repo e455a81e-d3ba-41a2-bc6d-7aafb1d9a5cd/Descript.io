@@ -5,6 +5,8 @@ open Descriptio.Parser.Core
 open Descriptio.Parser.MarkdownLexer
 
 module public MarkdownParser =
+    type ParserRule = Token list -> (IAbstractSyntaxTreeBlock * Token list) option
+
     let ParseAtxTitle input =
         let rec ParseTitleLevelTokens inp recDepth =
             match (inp, recDepth) with
@@ -193,7 +195,7 @@ module public MarkdownParser =
                                  | (ast, i) -> match parse i with
                                                | Some nextAst -> Some(ast.SetNext nextAst)
                                                | None -> None)
-            |> Seq.fold (fun s res -> if Option.isSome s then s else res) None
+            |> Seq.tryPick (fun s -> s)
 
         member public this.Parse input = (this :> IParser<_>).Parse input
 

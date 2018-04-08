@@ -145,6 +145,30 @@ namespace Descriptio.Tests.UnitTests
                   .Should<Token>()
                   .Equal(expectedTokens);
         }
+
+        public static readonly IEnumerable<object[]> Lexer_TextLine_ShouldLexIndentationCorrectly_Data = new[]
+        {
+            new object[]{ "  Hello World!", new[] { Token.NewTextToken("Hello World!") } },
+            new object[]{ "  Hello\r\n  World!", new[] { Token.NewTextToken("Hello World!") } }
+        };
+
+        [Theory(DisplayName = "Lexer should lex indentation correctly")]
+        [MemberData(nameof(Lexer_TextLine_ShouldLexIndentationCorrectly_Data))]
+        public void Lexer_TextLine_ShouldLexIndentationCorrectly(string source, Token[] expectedTokens)
+        {
+            // Arrange
+            var lexer = new TextLexer();
+
+            // Act
+            var result = lexer.Lex(source);
+
+            // Assert
+            result.Should()
+                  .BeSome()
+                  .And.Subject.Value.Item4
+                  .Should<Token>()
+                  .Equal(expectedTokens);
+        }
         
         public static readonly IEnumerable<object[]> Lexer_Image_ShouldReturnImageTokens_Data = new[]
         {
@@ -259,6 +283,25 @@ namespace Descriptio.Tests.UnitTests
             },
             new object[]
             {
+                "1. *abc* **def** `ghi`",
+                new[]
+                {
+                    Token.NewEnumerationToken(1),
+                    Token.EmphasisStartToken,
+                    Token.NewTextToken("abc"),
+                    Token.EmphasisEndToken,
+                    Token.NewTextToken(" "),
+                    Token.StrongStartToken,
+                    Token.NewTextToken("def"),
+                    Token.StrongEndToken,
+                    Token.NewTextToken(" "),
+                    Token.InlineCodeStartToken,
+                    Token.NewTextToken("ghi"),
+                    Token.InlineCodeEndToken
+                }
+            },
+            new object[]
+            {
                 @"3. def
 1. test
 214781. test",
@@ -277,6 +320,52 @@ namespace Descriptio.Tests.UnitTests
         [Theory(DisplayName = "Lexer should lex enumerations")]
         [MemberData(nameof(Lexer_Enumeration_ShouldReturnEnumerationTokens_Data))]
         public void Lexer_Enumeration_ShouldReturnEnumerationTokens(string source, Token[] expectedTokens)
+        {
+            // Arrange
+            var lexer = new TextLexer();
+
+            // Act
+            var result = lexer.Lex(source);
+
+            // Assert
+            result.Should()
+                  .BeSome()
+                  .And.Subject.Value.Item4
+                  .Should<Token>()
+                  .Equal(expectedTokens);
+        }
+        
+        public static readonly IEnumerable<object[]> Lexer_UnorderedEnumeration_ShouldReturnEnumerationTokens_Data = new[]
+        {
+            new object[]
+            {
+                "* abc",
+                new[]
+                {
+                    Token.NewUnorderedEnumerationToken(0, '*'),
+                    Token.NewTextToken("abc"),
+                }
+            },
+            new object[]
+            {
+                @"- def
+    - test
+        - test2",
+                new[]
+                {
+                    Token.NewUnorderedEnumerationToken(0, '-'),
+                    Token.NewTextToken("def"),
+                    Token.NewUnorderedEnumerationToken(1, '-'),
+                    Token.NewTextToken("test"),
+                    Token.NewUnorderedEnumerationToken(2, '-'),
+                    Token.NewTextToken("test2"),
+                }
+            },
+        };
+
+        [Theory(DisplayName = "Lexer should lex unordered enumerations")]
+        [MemberData(nameof(Lexer_UnorderedEnumeration_ShouldReturnEnumerationTokens_Data))]
+        public void Lexer_UnorderedEnumeration_ShouldReturnEnumerationTokens(string source, Token[] expectedTokens)
         {
             // Arrange
             var lexer = new TextLexer();
