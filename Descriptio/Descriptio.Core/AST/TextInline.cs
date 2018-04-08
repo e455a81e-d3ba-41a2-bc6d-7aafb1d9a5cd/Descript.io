@@ -12,5 +12,10 @@ namespace Descriptio.Core.AST
         public string Text { get; }
 
         public abstract TextInline SetText(string text);
+
+        public virtual void Accept(IAbstractSyntaxTreeInlineVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
     }
 }

@@ -20,6 +20,11 @@ namespace Descriptio.Core.AST
         public IAbstractSyntaxTreeBlock SetNext(IAbstractSyntaxTreeBlock next)
             => new TitleAst(Text, Level, next);
 
+        public void Accept(IAbstractSyntaxTreeVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
+
         public IAbstractSyntaxTreeBlock SetText(string text) => new TitleAst(text, Level, Next);
 
         public IAbstractSyntaxTreeBlock SetLevel(int level) => new TitleAst(Text, level, Next);

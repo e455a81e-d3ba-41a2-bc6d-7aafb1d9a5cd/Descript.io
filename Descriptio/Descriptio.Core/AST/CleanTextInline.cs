@@ -15,5 +15,10 @@ namespace Descriptio.Core.AST
         public override bool Equals(object obj) => obj is CleanTextInline o && Equals(o);
 
         public override int GetHashCode() => Text?.GetHashCode() ?? 0;
+
+        public override void Accept(IAbstractSyntaxTreeInlineVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
     }
 }

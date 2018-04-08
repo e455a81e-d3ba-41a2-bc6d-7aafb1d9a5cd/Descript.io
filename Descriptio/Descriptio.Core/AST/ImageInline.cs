@@ -42,6 +42,11 @@ namespace Descriptio.Core.AST
                 return hashCode;
             }
         }
+
+        public void Accept(IAbstractSyntaxTreeInlineVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
     }
 }
 

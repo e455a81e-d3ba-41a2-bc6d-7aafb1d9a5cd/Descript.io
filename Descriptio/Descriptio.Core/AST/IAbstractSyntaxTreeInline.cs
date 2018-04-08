@@ -6,5 +6,6 @@ namespace Descriptio.Core.AST
 {
     public interface IAbstractSyntaxTreeInline : IAbstractSyntaxTree
     {
+        void Accept(IAbstractSyntaxTreeInlineVisitor visitor);
     }
 }
