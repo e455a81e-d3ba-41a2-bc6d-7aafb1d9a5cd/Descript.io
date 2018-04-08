@@ -14,21 +14,7 @@ namespace Descriptio.Tests.UnitTests
     [Trait("Type", "Markdown.TextLexer")]
     public class MarkdownLexerTests
     {
-        [Theory]
-        [InlineData("****")]
-        public void Lexer_ShouldLexSuccessfully(string source)
-        {
-            // Arrange
-            var lexer = new TextLexer();
-
-            // Act
-            var result = lexer.Lex(source);
-
-            // Assert
-            result.Should().BeSome();
-        }
-
-        [Theory]
+        [Theory(DisplayName = "Lexer should lex title")]
         [InlineData("# Title", "Title", 1, 0)]
         [InlineData("## Level 2 ###", "Level 2", 2, 3)]
         public void Lexer_Title_ShouldReturnTitle(string source, string expectedTitle, int expectedLevel, int expectedClosingTokenCount)
@@ -63,7 +49,7 @@ namespace Descriptio.Tests.UnitTests
             new object[]{ "*Hello\r\nWor*ld!", new[] { Token.EmphasisStartToken, Token.NewTextToken("Hello Wor"), Token.EmphasisEndToken, Token.NewTextToken("ld!") } },
         };
 
-        [Theory]
+        [Theory(DisplayName = "Lexer should lex line breaks")]
         [MemberData(nameof(Lexer_LineBreak_ShouldReturnLines_Data))]
         public void Lexer_LineBreak_ShouldReturnLines(string source, Token[] expectedTokens)
         {
@@ -89,7 +75,7 @@ namespace Descriptio.Tests.UnitTests
             new object[]{ "*Hello World!**", new[] { Token.EmphasisStartToken, Token.NewTextToken("Hello World!"), Token.EmphasisEndToken, Token.NewTextToken("*")} }
         };
 
-        [Theory]
+        [Theory(DisplayName = "Lexer should lex emphasis inlines")]
         [MemberData(nameof(Lexer_Emphasis_ShouldReturnEmphasisTokens_Data))]
         public void Lexer_Emphasis_ShouldReturnEmphasisTokens(string source, Token[] expectedTokens)
         {
@@ -115,7 +101,7 @@ namespace Descriptio.Tests.UnitTests
             new object[]{ "**Hello World!***", new[] {Token.StrongStartToken, Token.NewTextToken("Hello World!"), Token.StrongEndToken, Token.NewTextToken("*")}},
         };
 
-        [Theory]
+        [Theory(DisplayName = "Lexer should lex strong inlines")]
         [MemberData(nameof(Lexer_Strong_ShouldReturnStrongTokens_Data))]
         public void Lexer_Strong_ShouldReturnStrongTokens(string source, Token[] expectedTokens)
         {
@@ -142,7 +128,7 @@ namespace Descriptio.Tests.UnitTests
             new object[]{ "`Hello\r\nWorld!`", new[] { Token.InlineCodeStartToken, Token.NewTextToken("Hello World!"), Token.InlineCodeEndToken } },
         };
 
-        [Theory]
+        [Theory(DisplayName = "Lexer should lex inline code")]
         [MemberData(nameof(Lexer_InlineCode_ShouldReturnInlineCodeTokens_Data))]
         public void Lexer_InlineCode_ShouldReturnInlineCodeTokens(string source, Token[] expectedTokens)
         {
@@ -192,7 +178,7 @@ namespace Descriptio.Tests.UnitTests
             },
         };
 
-        [Theory]
+        [Theory(DisplayName = "Lexer should lex image")]
         [MemberData(nameof(Lexer_Image_ShouldReturnImageTokens_Data))]
         public void Lexer_Image_ShouldReturnImageTokens(string source, Token[] expectedTokens)
         {
@@ -210,7 +196,7 @@ namespace Descriptio.Tests.UnitTests
                   .Equal(expectedTokens);
         }
         
-        public static readonly IEnumerable<object[]> Lexer_Hyperlink_ShouldReturnImageTokens_Data = new[]
+        public static readonly IEnumerable<object[]> Lexer_Hyperlink_ShouldReturnHyperlinkTokens_Data = new[]
         {
             new object[]
             {
@@ -242,9 +228,9 @@ namespace Descriptio.Tests.UnitTests
             },
         };
 
-        [Theory]
-        [MemberData(nameof(Lexer_Hyperlink_ShouldReturnImageTokens_Data))]
-        public void Lexer_Hyperlink_ShouldReturnImageTokens(string source, Token[] expectedTokens)
+        [Theory(DisplayName = "Lexer should lex hyperlinks")]
+        [MemberData(nameof(Lexer_Hyperlink_ShouldReturnHyperlinkTokens_Data))]
+        public void Lexer_Hyperlink_ShouldReturnHyperlinkTokens(string source, Token[] expectedTokens)
         {
             // Arrange
             var lexer = new TextLexer();
@@ -288,7 +274,7 @@ namespace Descriptio.Tests.UnitTests
             },
         };
 
-        [Theory]
+        [Theory(DisplayName = "Lexer should lex enumerations")]
         [MemberData(nameof(Lexer_Enumeration_ShouldReturnEnumerationTokens_Data))]
         public void Lexer_Enumeration_ShouldReturnEnumerationTokens(string source, Token[] expectedTokens)
         {
