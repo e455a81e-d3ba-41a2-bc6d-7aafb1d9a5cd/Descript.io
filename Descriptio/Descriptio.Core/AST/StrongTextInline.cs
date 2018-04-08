@@ -17,5 +17,10 @@ namespace Descriptio.Core.AST
         public override bool Equals(object obj) => obj is StrongTextInline other && Equals(other);
 
         public override int GetHashCode() => Text.GetHashCode();
+
+        public override void Accept(IAbstractSyntaxTreeInlineVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
     }
 }

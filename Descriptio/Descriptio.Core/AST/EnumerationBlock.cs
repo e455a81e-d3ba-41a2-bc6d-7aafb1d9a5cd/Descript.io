@@ -30,6 +30,11 @@ namespace Descriptio.Core.AST
         public virtual IAbstractSyntaxTreeBlock SetNext(IAbstractSyntaxTreeBlock next)
             => new EnumerationBlock(Items, next);
 
+        public void Accept(IAbstractSyntaxTreeVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
+
         public virtual bool Equals(EnumerationBlock other) => ReferenceEquals(this, other)
                                                               || !(other is null)
                                                               && Items.IsEquivalentTo(other.Items)

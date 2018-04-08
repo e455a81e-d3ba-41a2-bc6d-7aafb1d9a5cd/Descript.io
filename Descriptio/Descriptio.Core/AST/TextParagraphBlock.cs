@@ -25,6 +25,11 @@ namespace Descriptio.Core.AST
 
         public IAbstractSyntaxTreeBlock SetNext(IAbstractSyntaxTreeBlock next) => new TextParagraphBlock(Inlines, next);
 
+        public void Accept(IAbstractSyntaxTreeVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
+
         public TextParagraphBlock SetInlines(IImmutableList<IAbstractSyntaxTreeInline> inlines)
             => new TextParagraphBlock(inlines, Next);
 
