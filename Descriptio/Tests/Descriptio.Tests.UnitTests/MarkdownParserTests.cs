@@ -201,6 +201,34 @@ namespace Descriptio.Tests.UnitTests
                             }),
                     })
             },
+            new object[]
+            {
+                new[]
+                {
+                    Token.NewUnorderedEnumerationToken(0, '*'),
+                    Token.NewTextToken("Hello World!"),
+                    Token.NewUnorderedEnumerationToken(0, '*'),
+                    Token.NewTextToken("Second point.")
+                },
+                new UnorderedEnumerationBlock(
+                    items: new []
+                    {
+                        new UnorderedEnumerationItem(
+                            indent: 0,
+                            bullet: '*',
+                            inlines: new[]
+                            {
+                                new CleanTextInline("Hello World!")
+                            }),
+                        new UnorderedEnumerationItem(
+                            indent: 0,
+                            bullet: '*',
+                            inlines: new[]
+                            {
+                                new CleanTextInline("Second point.")
+                            }),
+                    })
+            },
         };
 
         [Theory(DisplayName = "Parser should parse enumeration")]

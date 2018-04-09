@@ -3,6 +3,7 @@ using Descriptio.Core.Extensions;
 
 namespace Descriptio.Core.AST
 {
+    [System.Diagnostics.DebuggerDisplay("*{" + nameof(Text) + "}*")]
     public class EmphasisTextInline : TextInline, IEquatable<EmphasisTextInline>
     {
         public EmphasisTextInline(string text) : base(text)

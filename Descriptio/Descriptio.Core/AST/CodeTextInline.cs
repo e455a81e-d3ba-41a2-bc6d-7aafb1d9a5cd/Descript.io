@@ -3,6 +3,7 @@ using Descriptio.Core.Extensions;
 
 namespace Descriptio.Core.AST
 {
+    [System.Diagnostics.DebuggerDisplay("``{" + nameof(Text) + "}``")]
     public class CodeTextInline : TextInline, IEquatable<CodeTextInline>
     {
         public CodeTextInline(string text) : base(text)

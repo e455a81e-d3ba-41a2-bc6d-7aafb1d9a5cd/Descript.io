@@ -153,6 +153,33 @@ module public MarkdownParser =
         | Some (asts, t) -> Some(TextParagraphBlock(asts) :> IAbstractSyntaxTreeBlock, t)
         | _ -> None
     
+    let ParseUnorderedEnumeration input =
+        let rec ParseUnorderedEnumerationItems input =
+            let ParseUnorderedEnumerationToken input =
+                match input with
+                | UnorderedEnumerationToken(indent, bullet)::t -> Some(indent, bullet, t)
+                | _ -> None
+            
+            match ParseUnorderedEnumerationToken input with
+            | None -> None
+            | Some(indent, bullet, inp) ->
+                let inlinesOption = ParseInlineRec (fun t -> match t with UnorderedEnumerationToken(_, _) | NewLineToken -> true | _ -> false) true inp
+
+                match inlinesOption with
+                | Some (asts, []) -> Some([UnorderedEnumerationItem(indent, bullet, asts)], [])
+                | Some (asts, NewLineToken::t) -> Some([UnorderedEnumerationItem(indent, bullet, asts)], t)
+                | Some (asts, UnorderedEnumerationToken(i, b)::t) ->
+                    let nextOption = ParseUnorderedEnumerationItems (UnorderedEnumerationToken(i, b)::t)
+                    match nextOption with
+                    | Some (next, t) -> Some(UnorderedEnumerationItem(indent, bullet, asts)::next, t)
+                    | _ -> None
+                | _ -> None
+
+        match ParseUnorderedEnumerationItems input with
+        | Some (asts, t) -> Some(UnorderedEnumerationBlock(asts) :> IAbstractSyntaxTreeBlock, t)
+        | _ -> None
+
+    
     let ParseEnumeration input =
         let rec ParseEnumerationItems input =
             let ParseEnumerationToken input =
@@ -182,6 +209,7 @@ module public MarkdownParser =
     let rules : (Token list -> (IAbstractSyntaxTreeBlock * Token list) option) list = [
             ParseAtxTitle;
             ParseEnumeration;
+            ParseUnorderedEnumeration;
             ParseTextParagraph;
         ]
 

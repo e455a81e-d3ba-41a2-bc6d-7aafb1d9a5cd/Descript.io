@@ -3,6 +3,7 @@ using Descriptio.Core.Extensions;
 
 namespace Descriptio.Core.AST
 {
+    [System.Diagnostics.DebuggerDisplay("**{" + nameof(Text) + "}**")]
     public class StrongTextInline : TextInline, IEquatable<StrongTextInline>
     {
         public StrongTextInline(string text) : base(text)

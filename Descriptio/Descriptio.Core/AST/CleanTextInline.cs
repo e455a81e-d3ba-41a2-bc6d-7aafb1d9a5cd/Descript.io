@@ -2,6 +2,7 @@
 
 namespace Descriptio.Core.AST
 {
+    [System.Diagnostics.DebuggerDisplay("{" + nameof(Text) + "}")]
     public class CleanTextInline : TextInline, IEquatable<CleanTextInline>
     {
         public CleanTextInline(string text) : base(text)

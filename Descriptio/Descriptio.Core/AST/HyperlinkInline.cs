@@ -3,6 +3,7 @@ using Descriptio.Core.Extensions;
 
 namespace Descriptio.Core.AST
 {
+    [System.Diagnostics.DebuggerDisplay("[{" + nameof(Text) + "}] ({" + nameof(Href) + "} {" + nameof(Title) + "})")]
     public class HyperlinkInline : TextInline, IEquatable<HyperlinkInline>
     {
 
