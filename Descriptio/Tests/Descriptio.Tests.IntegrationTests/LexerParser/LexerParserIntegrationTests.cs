@@ -18,7 +18,6 @@ namespace Descriptio.Tests.IntegrationTests.LexerParser
     {
         public static readonly IEnumerable<object[]> LexerParser_string_ShouldYieldDocument_Data = new[]
         {
-            new object[] { "# Title 1", new TitleAst("Title 1") },
             new object[]
             {
                 @"# Title 1

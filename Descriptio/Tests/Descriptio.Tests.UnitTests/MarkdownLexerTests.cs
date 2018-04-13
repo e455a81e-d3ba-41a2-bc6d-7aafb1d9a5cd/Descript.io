@@ -380,5 +380,52 @@ namespace Descriptio.Tests.UnitTests
                   .Should<Token>()
                   .Equal(expectedTokens);
         }
+        
+        public static readonly IEnumerable<object[]> Lexer_CodeBlock_ShouldReturnCodeBlockTokens_Data = new[]
+        {
+            new object[]
+            {
+                @"```
+Some code
+```",
+                new[]
+                {
+                    Token.CodeBlockStartToken,
+                    Token.NewTextToken("Some code"),
+                    Token.CodeBlockEndToken
+                }
+            },
+            new object[]
+            {
+                @"```c#
+int i = 0;
+```",
+                new[]
+                {
+                    Token.CodeBlockStartToken,
+                    Token.NewCodeBlockLanguageToken("c#"),
+                    Token.NewTextToken("int i = 0;"),
+                    Token.CodeBlockEndToken
+                }
+            },
+        };
+
+        [Theory(DisplayName = "Lexer should lex code blocks")]
+        [MemberData(nameof(Lexer_CodeBlock_ShouldReturnCodeBlockTokens_Data))]
+        public void Lexer_CodeBlock_ShouldReturnCodeBlockTokens(string source, Token[] expectedTokens)
+        {
+            // Arrange
+            var lexer = new TextLexer();
+
+            // Act
+            var result = lexer.Lex(source);
+
+            // Assert
+            result.Should()
+                  .BeSome()
+                  .And.Subject.Value.Item4
+                  .Should<Token>()
+                  .Equal(expectedTokens);
+        }
     }
 }
