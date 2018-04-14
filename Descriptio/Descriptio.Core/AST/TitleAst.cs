@@ -17,19 +17,19 @@ namespace Descriptio.Core.AST
 
         public int Level { get; }
 
-        public IAbstractSyntaxTreeBlock SetNext(IAbstractSyntaxTreeBlock next)
+        public virtual IAbstractSyntaxTreeBlock SetNext(IAbstractSyntaxTreeBlock next)
             => new TitleAst(Text, Level, next);
 
-        public void Accept(IAbstractSyntaxTreeVisitor visitor)
+        public virtual void Accept(IAbstractSyntaxTreeVisitor visitor)
         {
             visitor.Visit(this);
         }
 
-        public IAbstractSyntaxTreeBlock SetText(string text) => new TitleAst(text, Level, Next);
+        public virtual IAbstractSyntaxTreeBlock SetText(string text) => new TitleAst(text, Level, Next);
 
-        public IAbstractSyntaxTreeBlock SetLevel(int level) => new TitleAst(Text, level, Next);
+        public virtual IAbstractSyntaxTreeBlock SetLevel(int level) => new TitleAst(Text, level, Next);
 
-        public bool Equals(TitleAst other) => !(other is null) && Text == other.Text && Level == other.Level;
+        public virtual bool Equals(TitleAst other) => !(other is null) && Text == other.Text && Level == other.Level;
 
         public override bool Equals(object obj) => obj is TitleAst ast && Equals(ast);
 
@@ -37,8 +37,8 @@ namespace Descriptio.Core.AST
         {
             unchecked
             {
-                int hashCode = (Next != null ? Next.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Text != null ? Text.GetHashCode() : 0);
+                int hashCode = Next?.GetHashCode() ?? 0;
+                hashCode = (hashCode * 397) ^ (Text?.GetHashCode() ?? 0);
                 hashCode = (hashCode * 397) ^ Level;
                 return hashCode;
             }

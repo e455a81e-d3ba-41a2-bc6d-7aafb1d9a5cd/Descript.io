@@ -244,5 +244,49 @@ namespace Descriptio.Tests.UnitTests
             // Assert
             result.Should().Be(expected);
         }
+
+        public static readonly IEnumerable<object[]> Parser_CodeBlock_ShouldReturnCodeBlock_Data = new[]
+        {
+            new object[]
+            {
+                new[]
+                {
+                    Token.CodeBlockStartToken,
+                    Token.NewTextToken("I am some code()!"),
+                    Token.CodeBlockEndToken
+                },
+                new CodeBlock(
+                    language: string.Empty,
+                    lines: new [] { "I am some code()!" },
+                    next: null)
+            },
+            new object[]
+            {
+                new[]
+                {
+                    Token.CodeBlockStartToken,
+                    Token.NewCodeBlockLanguageToken("c#"),
+                    Token.NewTextToken("private void IAmCSharpCode()"),
+                    Token.NewTextToken("{"),
+                    Token.NewTextToken("}"),
+                    Token.CodeBlockEndToken
+                },
+                new CodeBlock("c#", new[] { "private void IAmCSharpCode()", "{", "}"})
+            },
+        };
+
+        [Theory(DisplayName = "Parser should parse code blocks")]
+        [MemberData(nameof(Parser_CodeBlock_ShouldReturnCodeBlock_Data))]
+        public void Parser_CodeBlock_ShouldReturnCodeBlock(Token[] source, FSharpOption<IAbstractSyntaxTree> expected)
+        {
+            // Arrange
+            var parser = new MarkdownParser.MarkdownParser();
+
+            // Act
+            var result = parser.Parse(source);
+
+            // Assert
+            result.Should().Be(expected);
+        }
     }
 }

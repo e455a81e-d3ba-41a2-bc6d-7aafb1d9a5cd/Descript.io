@@ -153,6 +153,34 @@ module public MarkdownParser =
         | Some (asts, t) -> Some(TextParagraphBlock(asts) :> IAbstractSyntaxTreeBlock, t)
         | _ -> None
     
+    let ParseCodeBlock input =
+        let ParseCodeBlockBegin input =
+            match input with
+            | CodeBlockStartToken::t -> Some([], t)
+            | _ -> None
+
+        let ParseCodeBlockLanguage inp =
+            match inp with
+            | None -> None
+            | Some(lines, input) -> match input with
+                                    | CodeBlockLanguageToken(lang)::t -> Some(lang, lines, t)
+                                    | _ -> Some("", lines, input)
+
+        let rec ParseCodeBlockContent inp =
+            match inp with
+            | None -> None
+            | Some (lang, lines, input) ->
+                match input with
+                | TextToken(txt)::t -> ParseCodeBlockContent(Some(lang, lines@[txt], t))
+                | CodeBlockEndToken::t -> Some(lang, lines, t)
+                | _ -> None
+
+        match input |> ParseCodeBlockBegin |> ParseCodeBlockLanguage |> ParseCodeBlockContent with
+        | Some(lang, lines, t) -> Some(CodeBlock(lang, lines) :> IAbstractSyntaxTreeBlock, t)
+        | _ -> None
+        
+        
+    
     let ParseUnorderedEnumeration input =
         let rec ParseUnorderedEnumerationItems input =
             let ParseUnorderedEnumerationToken input =
@@ -208,6 +236,7 @@ module public MarkdownParser =
 
     let rules : (Token list -> (IAbstractSyntaxTreeBlock * Token list) option) list = [
             ParseAtxTitle;
+            ParseCodeBlock;
             ParseEnumeration;
             ParseUnorderedEnumeration;
             ParseTextParagraph;
