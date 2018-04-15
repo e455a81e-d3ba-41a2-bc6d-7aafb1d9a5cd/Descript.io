@@ -27,7 +27,7 @@ namespace Descriptio.Transform.Html
         {
             _streamWriter.WriteLine(@"<p>");
             FormatInlines(textParagraphBlock.Inlines);
-            _streamWriter.Write("</p>");
+            _streamWriter.WriteLine("</p>");
         }
 
         public void Visit(EnumerationBlock enumerationBlock)
