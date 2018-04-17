@@ -23,6 +23,7 @@ module public MarkdownLexer =
     | EnumerationState
     | UnorderedEnumerationState
     | CodeBlockState
+    | BlockquoteState
 
     type public StackSymbols =
     | Z0
@@ -34,6 +35,7 @@ module public MarkdownLexer =
     | HyperlinkStack of State
     | CodeBlockLanguageStack of string
     | CodeBlockContentStack of string
+    | BlockquoteStack of State
 
     type public Token =
     | NewLineToken
@@ -58,6 +60,7 @@ module public MarkdownLexer =
     | CodeBlockStartToken
     | CodeBlockEndToken
     | CodeBlockLanguageToken of string
+    | BlockquoteToken
 
     [<Extension>]
     type public CharListExtensions =
@@ -69,6 +72,7 @@ module public MarkdownLexer =
 
     let inline (++) list tail = list@[tail]
     let inline (+!+) (list : 'a list) last = list.GetSlice(Some 0, Some(list.Length - 2))++last
+    let inline (!=) a b = a = b |> not
 
     let CharSeqUntil delimiters =
         let rec charSeq delimiters currentSeq input =
@@ -130,14 +134,28 @@ module public MarkdownLexer =
         | NewLine -> Some TextLine
         | TextLine
         | EnumerationState
-        | UnorderedEnumerationState -> Some state
+        | UnorderedEnumerationState
+        | BlockquoteState -> Some state
+        | _ -> None
+
+    let (|BlockquoteSupportedState|_|) state =
+        match state with
+        | NewLine
+        | BlockquoteState -> Some state
         | _ -> None
 
     let (|InlineState|_|) state =
         match state with
         | TextLine
         | EnumerationState
+        | BlockquoteState
         | UnorderedEnumerationState -> Some state
+        | _ -> None
+
+    let (|TitleSupportedState|_|) state =
+        match state with
+        | NewLine
+        | BlockquoteState -> Some state
         | _ -> None
 
     let (|IntNumber|_|) input =
@@ -150,6 +168,18 @@ module public MarkdownLexer =
             | (digit::t, _) -> GetIntNumber t (digits + digit.ToString())
         
         GetIntNumber input ""
+
+    let BlockquoteRules : Rule list = [
+        fun (input, state, stack, output) ->
+            match (input, state, stack) with
+            | ('>'::CollapsedWhitespaces(t), BlockquoteSupportedState(s), [Z0]) -> Some(t, BlockquoteState, BlockquoteStack(s)::stack, output++BlockquoteToken)
+            | (LineBreak(CollapsedWhitespaces(c::CollapsedWhitespaces(t))), BlockquoteState, BlockquoteStack(_)::_) when c = '>' |> not -> Some(c::t, BlockquoteState, stack, output)
+            | (LineBreak(LineBreak(t)), BlockquoteState, BlockquoteStack(_)::st)
+            | (LineBreak(CollapsedWhitespaces(LineBreak(t))), BlockquoteState, BlockquoteStack(_)::st) -> Some(t, NewLine, st, output++NewLineToken)
+            | ([], BlockquoteState, [BlockquoteStack(_); Z0]) -> Some([], NewLine, [Z0], output)
+            | ([], BlockquoteState, BlockquoteStack(_)::t) -> Some([], BlockquoteState, t, output)
+            | _ -> None
+        ]
 
     let CodeBlockRules(input, state, stack, output) =
         match (input, state, stack) with
@@ -166,32 +196,34 @@ module public MarkdownLexer =
     let titleRules : Rule list = [
             fun (input, state, stack, output) ->
                 match (input, state, stack) with
-                | ('#'::CollapsedWhitespaces(t), NewLine, [Z0]) -> Some(t, TitleState, stack, output++TitleLevelToken)
-                | ('#'::CollapsedWhitespaces(t), TitleLevelState, [Z0]) -> Some(t, TitleState, stack, output++TitleLevelToken)
-                | (LineBreak('#'::t), TextLine, [Z0])
-                | ('#'::t, NewLine, [Z0])
-                | ('#'::t, TitleLevelState, [Z0]) -> Some(t, TitleLevelState, stack, output++TitleLevelToken)
+                | ('#'::CollapsedWhitespaces(t), TitleSupportedState _, _) -> Some(t, TitleState, stack, output++TitleLevelToken)
+                | ('#'::CollapsedWhitespaces(t), TitleLevelState, _) -> Some(t, TitleState, stack, output++TitleLevelToken)
+                | (LineBreak('#'::t), TextLine, _)
+                | ('#'::t, TitleSupportedState _, _)
+                | ('#'::t, TitleLevelState, _) -> Some(t, TitleLevelState, stack, output++TitleLevelToken)
                 | _ -> None;
-
+                
             fun (input, state, stack, output) ->
                 match (input, state, stack) with
                 | (CollapsedWhitespaces('#'::t), TitleState, TextStack(txt)::s)
                 | ('#'::t, TitleState, TextStack(txt)::s) -> Some(t, TitleClosingState, s, output@[TitleToken(txt);TitleClosingToken])
-                | ('#'::t, TitleClosingState, [Z0]) -> Some(t, TitleClosingState, stack, output++TitleClosingToken)
+                | ('#'::t, TitleClosingState, _) -> Some(t, TitleClosingState, stack, output++TitleClosingToken)
                 | _ -> None;
 
             fun (input, state, stack, output) ->
                 match (input, state, stack) with
+                | (LineBreak(t), TitleState, TextStack(txt)::BlockquoteStack(s)::st) -> Some(t, s, st, output@[TitleToken(txt)])
                 | (LineBreak(t), TitleState, TextStack(txt)::s) -> Some(t, NewLine, s, output@[TitleToken(txt);NewLineToken])
-                | (LineBreak(t), TitleClosingState, [Z0]) -> Some(t, NewLine, stack, output++NewLineToken)
+                | (LineBreak(t), TitleClosingState, BlockquoteStack(s)::st) -> Some(t, s, st, output)
+                | (LineBreak(t), TitleClosingState, _) -> Some(t, NewLine, stack, output++NewLineToken)
                 | ([], TitleState, TextStack(txt)::s) -> Some([], NewLine, s, output++TitleToken(txt))
-                | ([], TitleClosingState, [Z0]) -> Some([], NewLine, stack, output)
+                | ([], TitleClosingState, _) -> Some([], NewLine, stack, output)
                 | _ -> None;
                 
             fun (input, state, stack, output) ->
                 match (input, state, stack) with
                 | (c::t, TitleState, TextStack(txt)::s) -> Some(t, TitleState, TextStack(txt + c.ToString())::s, output)
-                | (c::t, TitleState, [Z0]) -> Some(t, TitleState, TextStack(c.ToString())::stack, output)
+                | (c::t, TitleState, _) -> Some(t, TitleState, TextStack(c.ToString())::stack, output)
                 | _ -> None;
         ]
 
@@ -306,9 +338,9 @@ module public MarkdownLexer =
 
                 | (LineBreak(CollapsedWhitespaces(t)), TextLine, [Z0], Some(TextToken txt))
                 | (LineBreak(t), TextLine, [Z0], Some(TextToken txt)) -> Some(t, TextLine, stack, output+!+TextToken(txt + " "))
-                | (c::t, NewLine, [Z0], _) -> Some(t, TextLine, stack, output++TextToken(c.ToString()))
-                | (c::t, InlineSupportedState st, [Z0], Some(TextToken txt)) -> Some(t, st, stack, output+!+TextToken(txt + c.ToString()))
-                | (c::t, InlineSupportedState st, [Z0], _) -> Some(t, st, stack, output++TextToken(c.ToString()))
+                | (c::t, NewLine, _, _) -> Some(t, TextLine, stack, output++TextToken(c.ToString()))
+                | (c::t, InlineSupportedState st, _, Some(TextToken txt)) -> Some(t, st, stack, output+!+TextToken(txt + c.ToString()))
+                | (c::t, InlineSupportedState st, _, _) -> Some(t, st, stack, output++TextToken(c.ToString()))
                 | _ -> None;
         ]
 
@@ -321,6 +353,7 @@ module public MarkdownLexer =
         |> List.append blockRules
         |> List.append (enumerationRules++unorderedEnumerationRules)
         |> List.append (titleRules++CodeBlockRules)
+        |> List.append BlockquoteRules
 
     type public TextLexer() =
         let rec lexer (inp, state, stack, output) =

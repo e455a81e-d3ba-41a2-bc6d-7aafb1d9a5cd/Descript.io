@@ -427,5 +427,54 @@ int i = 0;
                   .Should<Token>()
                   .Equal(expectedTokens);
         }
+        
+        public static readonly IEnumerable<object[]> Lexer_Blockquote_ShouldReturnBlockquoteTokens_Data = new[]
+        {
+            new object[]
+            {
+                @"> This is a blockquote.",
+                new[]
+                {
+                    Token.BlockquoteToken,
+                    Token.NewTextToken("This is a blockquote.")
+                }
+            },
+            new object[]
+            {
+                @"> # This is a title inside the blockquote
+> Some text
+
+> A new blockquote",
+                new[]
+                {
+                    Token.BlockquoteToken,
+                    Token.TitleLevelToken,
+                    Token.NewTitleToken("This is a title inside the blockquote"),
+                    Token.BlockquoteToken,
+                    Token.NewTextToken("Some text"),
+                    Token.NewLineToken,
+                    Token.BlockquoteToken,
+                    Token.NewTextToken("A new blockquote")
+                }
+            },
+        };
+
+        [Theory(DisplayName = "Lexer should lex blockquote")]
+        [MemberData(nameof(Lexer_Blockquote_ShouldReturnBlockquoteTokens_Data))]
+        public void Lexer_Blockquote_ShouldReturnBlockquoteTokens(string source, Token[] expectedTokens)
+        {
+            // Arrange
+            var lexer = new TextLexer();
+
+            // Act
+            var result = lexer.Lex(source);
+
+            // Assert
+            result.Should()
+                  .BeSome()
+                  .And.Subject.Value.Item4
+                  .Should<Token>()
+                  .Equal(expectedTokens);
+        }
     }
 }

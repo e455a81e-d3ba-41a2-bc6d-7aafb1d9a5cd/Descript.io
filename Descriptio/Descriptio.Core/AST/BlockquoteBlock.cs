@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Immutable;
+using Descriptio.Core.Extensions;
 
 namespace Descriptio.Core.AST
 {
-    public class BlockquoteBlock : IAbstractSyntaxTreeBlock
+    public class BlockquoteBlock : IAbstractSyntaxTreeBlock, IEquatable<BlockquoteBlock>
     {
         public BlockquoteBlock(IImmutableList<IAbstractSyntaxTreeBlock> childBlocks, IAbstractSyntaxTreeBlock next)
         {
@@ -25,5 +26,16 @@ namespace Descriptio.Core.AST
         {
             throw new NotImplementedException();
         }
+
+        public virtual bool Equals(BlockquoteBlock other)
+            => ReferenceEquals(this, other)
+               || !ReferenceEquals(null, other)
+               && Equals(Next, other.Next)
+               && ChildBlocks.IsEquivalentTo(other.ChildBlocks);
+
+        public override bool Equals(object obj) => obj is BlockquoteBlock other && Equals(other);
+
+        public override int GetHashCode()
+            => unchecked(((Next?.GetHashCode() ?? 0) * 397) ^ (ChildBlocks?.GetHashCode() ?? 0));
     }
 }
