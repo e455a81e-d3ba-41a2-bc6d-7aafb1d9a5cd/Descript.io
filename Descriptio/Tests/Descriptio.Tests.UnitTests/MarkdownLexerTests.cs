@@ -97,7 +97,7 @@ namespace Descriptio.Tests.UnitTests
         {
             new object[]{ "**Hello World!**", new[] { Token.StrongStartToken, Token.NewTextToken("Hello World!"), Token.StrongEndToken } },
             new object[]{ "**Hello\r\nWorld!**", new[] { Token.StrongStartToken, Token.NewTextToken("Hello World!"), Token.StrongEndToken } },
-            new object[]{ "**Hello\nWorld!", new[] { Token.EmphasisStartToken, Token.EmphasisEndToken, Token.NewTextToken("Hello World!") } },
+            new object[]{ "**Hello\nWorld!", new[] { Token.NewTextToken("**Hello World!") } },
             new object[]{ "**Hello World!***", new[] {Token.StrongStartToken, Token.NewTextToken("Hello World!"), Token.StrongEndToken, Token.NewTextToken("*")}},
         };
 
