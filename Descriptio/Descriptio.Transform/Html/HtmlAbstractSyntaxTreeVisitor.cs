@@ -20,7 +20,7 @@ namespace Descriptio.Transform.Html
 
         public void Visit(TitleAst titleAst)
         {
-            _streamWriter.Write($"<h1>{titleAst.Text}</h1>");
+            _streamWriter.WriteLine($"<h{titleAst.Level}>{titleAst.Text}</h{titleAst.Level}>");
         }
 
         public void Visit(TextParagraphBlock textParagraphBlock)
@@ -35,7 +35,7 @@ namespace Descriptio.Transform.Html
             _streamWriter.WriteLine(@"<ol>");
             foreach (var item in enumerationBlock.Items)
             {
-                _streamWriter.WriteLine(@"<li>");
+                _streamWriter.Write(@"<li>");
                 FormatInlines(item.Inlines);
                 _streamWriter.WriteLine(@"</li>");
             }

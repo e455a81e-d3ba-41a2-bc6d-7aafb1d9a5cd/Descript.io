@@ -20,7 +20,8 @@ namespace Descriptio.Tests.UnitTests
                 level: 1,
                 next: null);
 
-            var expectedResult = @"<h1>Title 1</h1>";
+            var expectedResult = @"<h1>Title 1</h1>
+";
 
             var memoryStream = new MemoryStream();
             htmlFormatter.Transform(ast, memoryStream);
@@ -44,8 +45,7 @@ namespace Descriptio.Tests.UnitTests
             });
 
             var expectedResult = @"<p>
-This is a text.
-</p>
+This is a text.</p>
 ";
 
             var memoryStream = new MemoryStream();
@@ -70,8 +70,7 @@ This is a text.
             });
 
             var expectedResult = @"<p>
-This is a text. 
-<em>This should be emphasized.</em></p>
+This is a text. <em>This should be emphasized.</em></p>
 ";
 
             var memoryStream = new MemoryStream();
@@ -96,8 +95,7 @@ This is a text.
             });
 
             var expectedResult = @"<p>
-This is a text. 
-<strong>This should be strong.</strong></p>
+This is a text. <strong>This should be strong.</strong></p>
 ";
 
             var memoryStream = new MemoryStream();
@@ -125,8 +123,7 @@ This is a text.
             )});
 
             var expectedResult = @"<p>
-There is some text and a 
-<a href=""http://example.com"">link</a></p>
+There is some text and a <a href=""http://example.com"">link</a></p>
 ";
 
             var memoryStream = new MemoryStream();
@@ -144,14 +141,12 @@ There is some text and a
         {
             var htmlFormatter = new HtmlFormatter();
 
-            var ast = new TextParagraphBlock(new IAbstractSyntaxTreeInline[]
+            var ast = new TextParagraphBlock(new []
             {
-               new CleanTextInline("This can be seen in the figure below:"),
-               new ImageInline(alt: "Alt", src: @"C:\Path\To\An\Image.jpg", title: "It has a title too"),
+                new ImageInline(alt: "Alt", src: @"C:\Path\To\An\Image.jpg", title: "It has a title too"),
             });
 
             var expectedResult = @"<p>
-This can be seen in the figure below:
 <figure>
 <img src=""C:\Path\To\An\Image.jpg"" alt=""Alt""/>
 <figcaption>It has a title too</figcaption>
@@ -181,8 +176,7 @@ This can be seen in the figure below:
             });
 
             var expectedResult = @"<p>
-This is a text. 
-<code>This should be some code.</code></p>
+This is a text. <code>This should be some code.</code></p>
 ";
 
             var memoryStream = new MemoryStream();
@@ -210,15 +204,9 @@ This is a text.
                 );
 
             var expectedResult = @"<ol>
-<li>
-This should be item 1.
-</li>
-<li>
-This should be the second item.
-</li>
-<li>
-Though, this should be item 3.
-</li>
+<li>This should be item 1.</li>
+<li>This should be the second item.</li>
+<li>Though, this should be item 3.</li>
 </ol>
 ";
 

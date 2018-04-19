@@ -15,7 +15,7 @@ namespace Descriptio.Transform.Html
 
         public void Visit(CleanTextInline cleanTextInline)
         {
-            _streamWriter.WriteLine(cleanTextInline.Text);
+            _streamWriter.Write(cleanTextInline.Text);
         }
         
         public void Visit(TextInline textInline)
