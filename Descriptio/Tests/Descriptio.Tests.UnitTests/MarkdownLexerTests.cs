@@ -72,7 +72,13 @@ namespace Descriptio.Tests.UnitTests
             new object[]{ "*Hello World!*", new[] { Token.EmphasisStartToken, Token.NewTextToken("Hello World!"), Token.EmphasisEndToken } },
             new object[]{ "*Hello\r\nWorld!*", new[] { Token.EmphasisStartToken, Token.NewTextToken("Hello World!"), Token.EmphasisEndToken } },
             new object[]{ "*Hello\nWorld!", new[] { Token.NewTextToken("*Hello World!") } },
-            new object[]{ "*Hello World!**", new[] { Token.EmphasisStartToken, Token.NewTextToken("Hello World!"), Token.EmphasisEndToken, Token.NewTextToken("*")} }
+            new object[]{ "*Hello World!**", new[] { Token.EmphasisStartToken, Token.NewTextToken("Hello World!"), Token.EmphasisEndToken, Token.NewTextToken("*")} },
+            new object[]{ "_Hello World!_", new[] { Token.EmphasisStartToken, Token.NewTextToken("Hello World!"), Token.EmphasisEndToken } },
+            new object[]{ "_Hello\r\nWorld!_", new[] { Token.EmphasisStartToken, Token.NewTextToken("Hello World!"), Token.EmphasisEndToken } },
+            new object[]{ "_Hello\nWorld!", new[] { Token.NewTextToken("_Hello World!") } },
+            new object[]{ "_Hello World!__", new[] { Token.EmphasisStartToken, Token.NewTextToken("Hello World!"), Token.EmphasisEndToken, Token.NewTextToken("_") } },
+            new object[]{ "*Hello World!_", new[] { Token.NewTextToken("*Hello World!_") } },
+            new object[]{ "_Hello World!*", new[] { Token.NewTextToken("_Hello World!*") } }
         };
 
         [Theory(DisplayName = "Lexer should lex emphasis inlines")]
@@ -98,7 +104,13 @@ namespace Descriptio.Tests.UnitTests
             new object[]{ "**Hello World!**", new[] { Token.StrongStartToken, Token.NewTextToken("Hello World!"), Token.StrongEndToken } },
             new object[]{ "**Hello\r\nWorld!**", new[] { Token.StrongStartToken, Token.NewTextToken("Hello World!"), Token.StrongEndToken } },
             new object[]{ "**Hello\nWorld!", new[] { Token.NewTextToken("**Hello World!") } },
-            new object[]{ "**Hello World!***", new[] {Token.StrongStartToken, Token.NewTextToken("Hello World!"), Token.StrongEndToken, Token.NewTextToken("*")}},
+            new object[]{ "**Hello World!***", new[] {Token.StrongStartToken, Token.NewTextToken("Hello World!"), Token.StrongEndToken, Token.NewTextToken("*") } },
+            new object[]{ "__Hello World!__", new[] { Token.StrongStartToken, Token.NewTextToken("Hello World!"), Token.StrongEndToken } },
+            new object[]{ "__Hello\r\nWorld!__", new[] { Token.StrongStartToken, Token.NewTextToken("Hello World!"), Token.StrongEndToken } },
+            new object[]{ "__Hello\nWorld!", new[] { Token.NewTextToken("__Hello World!") } },
+            new object[]{ "__Hello World!___", new[] { Token.StrongStartToken, Token.NewTextToken("Hello World!"), Token.StrongEndToken, Token.NewTextToken("_") } },
+            new object[]{ "**Hello World!__", new[] { Token.NewTextToken("**Hello World!__") } },
+            new object[]{ "__Hello World!**", new[] { Token.NewTextToken("__Hello World!**") } },
         };
 
         [Theory(DisplayName = "Lexer should lex strong inlines")]
@@ -437,6 +449,26 @@ int i = 0;
                 {
                     Token.BlockquoteToken,
                     Token.NewTextToken("This is a blockquote.")
+                }
+            },
+            new object[]
+            {
+                @"> *This is an emphasized blockquote*
+> __This is a strong blockquote__
+> ``This is a code inline blockquote``
+> ![Hello World](img.jpg ""Title"")
+> [Hello World](http://example.com ""Example.com"")",
+                new[]
+                {
+                    Token.BlockquoteToken, Token.EmphasisStartToken, Token.NewTextToken("This is an emphasized blockquote"), Token.EmphasisEndToken,
+                    Token.BlockquoteToken, Token.StrongStartToken, Token.NewTextToken("This is a strong blockquote"), Token.StrongEndToken,
+                    Token.BlockquoteToken, Token.InlineCodeStartToken, Token.NewTextToken("This is a code inline blockquote"), Token.InlineCodeEndToken,
+                    Token.BlockquoteToken,
+                    Token.ImageAltStartToken,  Token.NewTextToken("Hello World"), Token.ImageAltEndToken,
+                    Token.LinkStartToken, Token.NewTextToken("img.jpg"), Token.NewTextToken("Title"), Token.LinkEndToken,
+                    Token.BlockquoteToken,
+                    Token.LinkTextStartToken, Token.NewTextToken("Hello World"), Token.LinkTextEndToken,
+                    Token.LinkStartToken, Token.NewTextToken("http://example.com"), Token.NewTextToken("Example.com"), Token.LinkEndToken,
                 }
             },
             new object[]

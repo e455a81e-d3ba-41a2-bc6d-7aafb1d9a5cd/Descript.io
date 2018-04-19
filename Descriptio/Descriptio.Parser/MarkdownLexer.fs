@@ -176,6 +176,7 @@ module public MarkdownLexer =
             | (LineBreak(CollapsedWhitespaces(c::CollapsedWhitespaces(t))), BlockquoteState, BlockquoteStack(_)::_) when c = '>' |> not -> Some(c::t, BlockquoteState, stack, output)
             | (LineBreak(LineBreak(t)), BlockquoteState, BlockquoteStack(_)::st)
             | (LineBreak(CollapsedWhitespaces(LineBreak(t))), BlockquoteState, BlockquoteStack(_)::st) -> Some(t, NewLine, st, output++NewLineToken)
+            | (LineBreak(t), BlockquoteState, BlockquoteStack(s)::st) -> Some(t, s, st, output)
             | ([], BlockquoteState, [BlockquoteStack(_); Z0]) -> Some([], NewLine, [Z0], output)
             | ([], BlockquoteState, BlockquoteStack(_)::t) -> Some([], BlockquoteState, t, output)
             | _ -> None
@@ -254,9 +255,9 @@ module public MarkdownLexer =
     let imageHyperlinkRules : Rule list = [
             fun (input, state, stack, output) ->
                 match (input, state, stack) with
-                | ('!'::'['::t, InlineSupportedState st, [Z0]) -> Some(t, ImageAltState, ImageStack(st)::stack, output++ImageAltStartToken)
+                | ('!'::'['::t, InlineSupportedState st, _) -> Some(t, ImageAltState, ImageStack(st)::stack, output++ImageAltStartToken)
 
-                | ('['::t, InlineSupportedState st, [Z0]) -> Some(t, HyperlinkTextState, HyperlinkStack(st)::stack, output++LinkTextStartToken)
+                | ('['::t, InlineSupportedState st, _) -> Some(t, HyperlinkTextState, HyperlinkStack(st)::stack, output++LinkTextStartToken)
 
                 | (']'::'('::t, ImageAltState, TextStack(txt)::s) -> Some(t, LinkState, s, output++TextToken(txt.BuildString())++ImageAltEndToken++LinkStartToken)
                 | (']'::'('::t, HyperlinkTextState, TextStack(txt)::s) -> Some(t, LinkState, s, output++TextToken(txt.BuildString())++LinkTextEndToken++LinkStartToken)
@@ -281,15 +282,15 @@ module public MarkdownLexer =
     let inlineCodeRules : Rule list = [
             fun (input, state, stack, output) ->
                 match (input, state, stack) with
-                | ('`'::'`'::t, InlineSupportedState st, [Z0]) -> Some(t, InlineCodeLiteralState, InlineCodeStack(st)::stack, output++InlineCodeStartToken)
                 | ('`'::'`'::t, InlineCodeLiteralState, TextStack(txt)::InlineCodeStack(st)::s) -> Some(t, st, s, output++TextToken(txt.BuildString())++InlineCodeEndToken)
+                | ('`'::'`'::t, InlineSupportedState st, _) -> Some(t, InlineCodeLiteralState, InlineCodeStack(st)::stack, output++InlineCodeStartToken)
                 | (LineBreak(t), InlineCodeLiteralState, TextStack(txt)::s) -> Some(t, InlineCodeLiteralState, TextStack(txt++' ')::s, output)
                 | (LineBreak(t), InlineCodeState, TextStack(txt)::s) -> Some(t, InlineCodeState, TextStack(txt++' ')::s, output)
 
                 | (c::t, InlineCodeLiteralState, TextStack(txt)::s) -> Some(t, InlineCodeLiteralState, TextStack(txt++c)::s, output)
                 | (c::t, InlineCodeLiteralState, InlineCodeStack(_)::_) -> Some(t, InlineCodeLiteralState, TextStack([c])::stack, output)
-                | ('`'::t, InlineSupportedState st, [Z0]) -> Some(t, InlineCodeState, InlineCodeStack(st)::stack, output++InlineCodeStartToken)
                 | ('`'::t, InlineCodeState, TextStack(txt)::InlineCodeStack(st)::s) -> Some(t, st, s, output++TextToken(txt.BuildString())++InlineCodeEndToken)
+                | ('`'::t, InlineSupportedState st, _) -> Some(t, InlineCodeState, InlineCodeStack(st)::stack, output++InlineCodeStartToken)
                 | (LineBreak(t), InlineCodeState, TextStack(txt)::s) -> Some(t, state, TextStack(txt++' ')::s, output)
                 | (c::t, InlineCodeState, TextStack(txt)::s) -> Some(t, state, TextStack(txt++c)::s, output)
                 | (c::t, InlineCodeState, InlineCodeStack(_)::_) -> Some(t, state, TextStack([c])::stack, output)
@@ -305,10 +306,10 @@ module public MarkdownLexer =
                 | ('_'::' '::_, InlineSupportedState _, TextStack(_)::_)
                 | (' '::'*'::_, InlineSupportedState _, TextStack(_)::_) 
                 | (' '::'_'::_, InlineSupportedState _, TextStack(_)::_) -> None
-                | ('*'::'*'::t, InlineSupportedState st, [Z0]) -> Some(t, st, StrongStack('*')::stack, output++StrongStartToken)
                 | ('*'::'*'::t, InlineSupportedState st, TextStack(txt)::StrongStack('*')::s) -> Some(t, st, s, output++TextToken(txt.BuildString())++StrongEndToken)
-                | ('_'::'_'::t, InlineSupportedState st, [Z0]) -> Some(t, st, StrongStack('_')::stack, output++StrongStartToken)
-                | ('_'::'_'::t, InlineSupportedState st, StrongStack('_')::s) -> Some(t, st, s, output++StrongEndToken)
+                | ('*'::'*'::t, InlineSupportedState st, _) -> Some(t, st, StrongStack('*')::stack, output++StrongStartToken)
+                | ('_'::'_'::t, InlineSupportedState st, TextStack(txt)::StrongStack('_')::s) -> Some(t, st, s, output++TextToken(txt.BuildString())++StrongEndToken)
+                | ('_'::'_'::t, InlineSupportedState st, _) -> Some(t, st, StrongStack('_')::stack, output++StrongStartToken)
                 | (LineBreak(t), InlineSupportedState st, TextStack(txt)::StrongStack(_)::_) -> Some(t, st, TextStack(txt++' ')::stack.Tail, output)
                 | (c::t, InlineSupportedState st, TextStack(txt)::StrongStack(_)::_) -> Some(t, st, TextStack(txt++c)::stack.Tail, output)
                 | (c::t, InlineSupportedState st, StrongStack(_)::_) -> Some(t, st, TextStack([c])::stack, output)

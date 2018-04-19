@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Descriptio.Core.Extensions;
 
@@ -6,21 +7,27 @@ namespace Descriptio.Core.AST
 {
     public class BlockquoteBlock : IAbstractSyntaxTreeBlock, IEquatable<BlockquoteBlock>
     {
-        public BlockquoteBlock(IImmutableList<IAbstractSyntaxTreeBlock> childBlocks, IAbstractSyntaxTreeBlock next)
+        public BlockquoteBlock(IImmutableList<IAbstractSyntaxTreeInline> inlines, IAbstractSyntaxTreeBlock next = null)
         {
-            ChildBlocks = childBlocks ?? throw new ArgumentNullException(nameof(childBlocks));
+            Inlines = inlines ?? throw new ArgumentNullException(nameof(inlines));
+            Next = next;
+        }
+
+        public BlockquoteBlock(IEnumerable<IAbstractSyntaxTreeInline> inlines, IAbstractSyntaxTreeBlock next = null)
+        {
+            Inlines = ImmutableList.CreateRange(inlines ?? throw new ArgumentNullException(nameof(inlines)));
             Next = next;
         }
 
         public IAbstractSyntaxTreeBlock Next { get; }
 
-        public IImmutableList<IAbstractSyntaxTreeBlock> ChildBlocks { get; }
+        public IImmutableList<IAbstractSyntaxTreeInline> Inlines { get; }
 
         public virtual IAbstractSyntaxTreeBlock SetNext(IAbstractSyntaxTreeBlock next)
-            => new BlockquoteBlock(ChildBlocks, next);
+            => new BlockquoteBlock(Inlines, next);
 
-        public virtual BlockquoteBlock SetChildBlocks(IImmutableList<IAbstractSyntaxTreeBlock> blocks)
-            => new BlockquoteBlock(blocks, Next);
+        public virtual BlockquoteBlock SetChildBlocks(IImmutableList<IAbstractSyntaxTreeInline> inlines)
+            => new BlockquoteBlock(inlines, Next);
 
         public virtual void Accept(IAbstractSyntaxTreeVisitor visitor)
         {
@@ -31,11 +38,11 @@ namespace Descriptio.Core.AST
             => ReferenceEquals(this, other)
                || !ReferenceEquals(null, other)
                && Equals(Next, other.Next)
-               && ChildBlocks.IsEquivalentTo(other.ChildBlocks);
+               && Inlines.IsEquivalentTo(other.Inlines);
 
         public override bool Equals(object obj) => obj is BlockquoteBlock other && Equals(other);
 
         public override int GetHashCode()
-            => unchecked(((Next?.GetHashCode() ?? 0) * 397) ^ (ChildBlocks?.GetHashCode() ?? 0));
+            => unchecked(((Next?.GetHashCode() ?? 0) * 397) ^ (Inlines?.GetHashCode() ?? 0));
     }
 }

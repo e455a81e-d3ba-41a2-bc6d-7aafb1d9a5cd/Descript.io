@@ -288,5 +288,47 @@ namespace Descriptio.Tests.UnitTests
             // Assert
             result.Should().Be(expected);
         }
+
+        public static readonly IEnumerable<object[]> Parser_Blockquote_ShouldReturnBlockquote_Data = new[]
+        {
+            new object[]
+            {
+                new[]
+                {
+                    Token.BlockquoteToken,
+                    Token.NewTextToken("I am a blockquote!")
+                },
+                new BlockquoteBlock(inlines: new[] { new CleanTextInline("I am a blockquote!") })
+            },
+            new object[]
+            {
+                new[]
+                {
+                    Token.BlockquoteToken, Token.EmphasisStartToken, Token.NewTextToken("This is an emphasized blockquote"), Token.EmphasisEndToken,
+                    Token.BlockquoteToken, Token.StrongStartToken, Token.NewTextToken("This is a strong blockquote"), Token.StrongEndToken,
+                    Token.BlockquoteToken, Token.InlineCodeStartToken, Token.NewTextToken("This is a code inline blockquote"), Token.InlineCodeEndToken,
+                },
+                new BlockquoteBlock(inlines: new IAbstractSyntaxTreeInline[]
+                {
+                    new EmphasisTextInline("This is an emphasized blockquote"),
+                    new StrongTextInline("This is a strong blockquote"),
+                    new CodeTextInline("This is a code inline blockquote")
+                })
+            },
+        };
+
+        [Theory(DisplayName = "Parser should parse blockquotes")]
+        [MemberData(nameof(Parser_Blockquote_ShouldReturnBlockquote_Data))]
+        public void Parser_Blockquote_ShouldReturnBlockquote(Token[] source, FSharpOption<IAbstractSyntaxTree> expected)
+        {
+            // Arrange
+            var parser = new MarkdownParser.MarkdownParser();
+
+            // Act
+            var result = parser.Parse(source);
+
+            // Assert
+            result.Should().Be(expected);
+        }
     }
 }
