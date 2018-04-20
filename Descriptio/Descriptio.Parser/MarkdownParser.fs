@@ -136,6 +136,36 @@ module public MarkdownParser =
         |> Seq.filter Option.isSome
         |> Seq.fold (fun acc r -> if Option.isSome acc then acc else r) None
 
+    let ParseBlockquote input =
+        let ParseBlockquoteToken input =
+            match input with
+            | BlockquoteToken::t -> Some(t)
+            | _ -> None
+        
+        let ParseBlockquoteInlines input =
+            let rec ParseBlockquoteInlinesRec (inlines : IAbstractSyntaxTreeInline list) input =
+                match input with
+                | [] -> Some(inlines, [])
+                | NewLineToken::t -> Some(inlines, t)
+                | BlockquoteToken::t -> ParseBlockquoteInlinesRec inlines t
+                | _ -> match ParseInline input with
+                       | Some(ast, t) -> ParseBlockquoteInlinesRec (inlines++ast) t
+                       | None -> None
+
+            match input with
+            | Some(t) -> ParseBlockquoteInlinesRec [] t
+            | None -> None
+
+        let ToBlockquoteBlock (input : (IAbstractSyntaxTreeInline list * Token list) option) =
+            match input with
+            | Some(inlines, t) -> Some(BlockquoteBlock(inlines) :> IAbstractSyntaxTreeBlock, t)
+            | None -> None
+            
+        input
+        |> ParseBlockquoteToken
+        |> ParseBlockquoteInlines
+        |> ToBlockquoteBlock
+
     let rec ParseInlineRec lineDelimiter keepDelimiter input =
         match ParseInline input with
         | Some (ast, []) -> Some ([ast], [])
@@ -236,6 +266,7 @@ module public MarkdownParser =
 
     let rules : (Token list -> (IAbstractSyntaxTreeBlock * Token list) option) list = [
             ParseAtxTitle;
+            ParseBlockquote;
             ParseCodeBlock;
             ParseEnumeration;
             ParseUnorderedEnumeration;

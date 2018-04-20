@@ -315,6 +315,21 @@ namespace Descriptio.Tests.UnitTests
                     new CodeTextInline("This is a code inline blockquote")
                 })
             },
+            new object[]
+            {
+                new[]
+                {
+                    Token.BlockquoteToken, Token.EmphasisStartToken, Token.NewTextToken("This is an emphasized blockquote"), Token.EmphasisEndToken, Token.NewLineToken,
+                    Token.BlockquoteToken, Token.StrongStartToken, Token.NewTextToken("This is a strong blockquote"), Token.StrongEndToken, Token.NewLineToken,
+                    Token.BlockquoteToken, Token.InlineCodeStartToken, Token.NewTextToken("This is a code inline blockquote"), Token.InlineCodeEndToken, Token.NewLineToken,
+                },
+                new BlockquoteBlock(
+                    inlines: new[] { new EmphasisTextInline("This is an emphasized blockquote") },
+                    next: new BlockquoteBlock(
+                        inlines: new[]{ new StrongTextInline("This is a strong blockquote") },
+                        next: new BlockquoteBlock(
+                            inlines: new[] { new CodeTextInline("This is a code inline blockquote") })))
+            },
         };
 
         [Theory(DisplayName = "Parser should parse blockquotes")]
