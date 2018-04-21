@@ -279,6 +279,7 @@ module public MarkdownLexer =
             fun (input, state, stack, output) ->
                 match (input, state, stack) with
                 | (LineBreak(LineBreak t), TextLine, TextStack(txt)::st) -> Some(t, NewLine, st, output@[TextToken(txt.BuildString()); NewLineToken])
+                | (LineBreak(LineBreak t), TextLine, [Z0]) -> Some(t, NewLine, [Z0], output++NewLineToken)
                 | (LineBreak(LineBreak t), NewLine, [Z0]) -> Some(t, NewLine, stack, output++NewLineToken)
                 | _ -> None;
         ]
@@ -378,6 +379,7 @@ module public MarkdownLexer =
 
                 | (LineBreak(CollapsedWhitespaces(t)), TextLine, TextStack(txt)::st)
                 | (LineBreak(t), TextLine, TextStack(txt)::st) -> Some(t, TextLine, TextStack(txt++' ')::st, output)
+                | (LineBreak(t), TextLine, _) -> Some(t, TextLine, TextStack([' '])::stack, output)
                 | (c::t, NewLine, _) -> Some(t, TextLine, TextStack([c])::stack, output)
                 | (c::t, InlineSupportedState s, TextStack(txt)::st) -> Some(t, s, TextStack(txt++c)::st, output)
                 | (c::t, InlineSupportedState s, _) -> Some(t, s, TextStack([c])::stack, output)
