@@ -24,7 +24,7 @@ namespace Descriptio.Tests.UnitTests
 
         [Theory(DisplayName = "Parser should parse ATX Title")]
         [MemberData(nameof(Parser_AtxTitle_ShouldReturnTitle_Data))]
-        public void Parser_AtxTitle_ShouldReturnTitle(Token[] source, FSharpOption<IAbstractSyntaxTree> expected)
+        public void Parser_AtxTitle_ShouldReturnTitle(Token[] source, FSharpOption<IAbstractSyntaxTreeBlock> expected)
         {
             // Arrange
             var parser = new MarkdownParser.MarkdownParser();
@@ -161,7 +161,7 @@ namespace Descriptio.Tests.UnitTests
 
         [Theory(DisplayName = "Parser should parse text line")]
         [MemberData(nameof(Parser_TextLine_ShouldReturnTextLine_Data))]
-        public void Parser_TextLine_ShouldReturnTextLine(Token[] source, FSharpOption<IAbstractSyntaxTree> expected)
+        public void Parser_TextLine_ShouldReturnTextLine(Token[] source, FSharpOption<IAbstractSyntaxTreeBlock> expected)
         {
             // Arrange
             var parser = new MarkdownParser.MarkdownParser();
@@ -179,26 +179,16 @@ namespace Descriptio.Tests.UnitTests
             {
                 new[]
                 {
-                    Token.NewEnumerationToken(1),
+                    Token.NewEnumerationToken(0, 1),
                     Token.NewTextToken("Hello World!"),
-                    Token.NewEnumerationToken(2),
+                    Token.NewEnumerationToken(0, 2),
                     Token.NewTextToken("Second point.")
                 },
                 new EnumerationBlock(
                     items: new []
                     {
-                        new EnumerationItem(
-                            number: 1,
-                            inlines: new[]
-                            {
-                                new CleanTextInline("Hello World!")
-                            }),
-                        new EnumerationItem(
-                            number: 2,
-                            inlines: new[]
-                            {
-                                new CleanTextInline("Second point.")
-                            }),
+                        new EnumerationItem(indent: 0, number: 1, inlines: new[] { new CleanTextInline("Hello World!") }),
+                        new EnumerationItem(indent: 0, number: 2, inlines: new[] { new CleanTextInline("Second point.") }),
                     })
             },
             new object[]
@@ -213,27 +203,15 @@ namespace Descriptio.Tests.UnitTests
                 new UnorderedEnumerationBlock(
                     items: new []
                     {
-                        new UnorderedEnumerationItem(
-                            indent: 0,
-                            bullet: '*',
-                            inlines: new[]
-                            {
-                                new CleanTextInline("Hello World!")
-                            }),
-                        new UnorderedEnumerationItem(
-                            indent: 0,
-                            bullet: '*',
-                            inlines: new[]
-                            {
-                                new CleanTextInline("Second point.")
-                            }),
+                        new UnorderedEnumerationItem(indent: 0, bullet: '*', inlines: new[] { new CleanTextInline("Hello World!") }),
+                        new UnorderedEnumerationItem(indent: 0, bullet: '*', inlines: new[] {  new CleanTextInline("Second point.") }),
                     })
             },
         };
 
         [Theory(DisplayName = "Parser should parse enumeration")]
         [MemberData(nameof(Parser_Enumeration_ShouldReturnEnumeration_Data))]
-        public void Parser_Enumeration_ShouldReturnEnumeration(Token[] source, FSharpOption<IAbstractSyntaxTree> expected)
+        public void Parser_Enumeration_ShouldReturnEnumeration(Token[] source, FSharpOption<IAbstractSyntaxTreeBlock> expected)
         {
             // Arrange
             var parser = new MarkdownParser.MarkdownParser();
@@ -257,8 +235,7 @@ namespace Descriptio.Tests.UnitTests
                 },
                 new CodeBlock(
                     language: string.Empty,
-                    lines: new [] { "I am some code()!" },
-                    next: null)
+                    lines: new [] { "I am some code()!" })
             },
             new object[]
             {
@@ -277,7 +254,7 @@ namespace Descriptio.Tests.UnitTests
 
         [Theory(DisplayName = "Parser should parse code blocks")]
         [MemberData(nameof(Parser_CodeBlock_ShouldReturnCodeBlock_Data))]
-        public void Parser_CodeBlock_ShouldReturnCodeBlock(Token[] source, FSharpOption<IAbstractSyntaxTree> expected)
+        public void Parser_CodeBlock_ShouldReturnCodeBlock(Token[] source, FSharpOption<IAbstractSyntaxTreeBlock> expected)
         {
             // Arrange
             var parser = new MarkdownParser.MarkdownParser();
@@ -334,7 +311,7 @@ namespace Descriptio.Tests.UnitTests
 
         [Theory(DisplayName = "Parser should parse blockquotes")]
         [MemberData(nameof(Parser_Blockquote_ShouldReturnBlockquote_Data))]
-        public void Parser_Blockquote_ShouldReturnBlockquote(Token[] source, FSharpOption<IAbstractSyntaxTree> expected)
+        public void Parser_Blockquote_ShouldReturnBlockquote(Token[] source, FSharpOption<IAbstractSyntaxTreeBlock> expected)
         {
             // Arrange
             var parser = new MarkdownParser.MarkdownParser();

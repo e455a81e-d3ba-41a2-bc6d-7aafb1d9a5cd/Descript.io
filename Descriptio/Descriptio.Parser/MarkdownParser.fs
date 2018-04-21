@@ -242,21 +242,21 @@ module public MarkdownParser =
         let rec ParseEnumerationItems input =
             let ParseEnumerationToken input =
                 match input with
-                | EnumerationToken(num)::t -> Some(num, t)
+                | EnumerationToken(indent, num)::t -> Some(indent, num, t)
                 | _ -> None
             
             match ParseEnumerationToken input with
             | None -> None
-            | Some(num, inp) ->
+            | Some(indent, num, inp) ->
                 let inlinesOption = ParseInlineRec (fun t -> match t with EnumerationToken(_) | NewLineToken -> true | _ -> false) true inp
 
                 match inlinesOption with
-                | Some (asts, []) -> Some([EnumerationItem(num, asts)], [])
-                | Some (asts, NewLineToken::t) -> Some([EnumerationItem(num, asts)], t)
-                | Some (asts, EnumerationToken(n)::t) ->
-                    let nextOption = ParseEnumerationItems (EnumerationToken(n)::t)
+                | Some (asts, []) -> Some([EnumerationItem(indent, num, asts)], [])
+                | Some (asts, NewLineToken::t) -> Some([EnumerationItem(indent, num, asts)], t)
+                | Some (asts, EnumerationToken(ind, n)::t) ->
+                    let nextOption = ParseEnumerationItems (EnumerationToken(ind, n)::t)
                     match nextOption with
-                    | Some (next, t) -> Some(EnumerationItem(num, asts)::next, t)
+                    | Some (next, t) -> Some(EnumerationItem(ind, num, asts)::next, t)
                     | _ -> None
                 | _ -> None
 
@@ -288,7 +288,5 @@ module public MarkdownParser =
         member public this.Parse input = (this :> IParser<_>).Parse input
 
         interface IParser<Token seq> with
-            member __.Parse input = match parse [for t in input -> t] with
-                                    | Some astb -> Some (astb :> IAbstractSyntaxTree)
-                                    | None -> None
+            member __.Parse input = parse [for t in input -> t]
                 

@@ -68,9 +68,9 @@ and an image ![Alt](C:\Path\To\An\Image.jpg, ""It has a title too"")
                             next: new EnumerationBlock(
                                 items: new[]
                                 {
-                                    new EnumerationItem(1, new[] { new CleanTextInline("This should be item 1.") }),
-                                    new EnumerationItem(2, new[] { new CleanTextInline("This should be the second item.")}),
-                                    new EnumerationItem(1234, new[] { new CleanTextInline("Though, this should be item 3.")})
+                                    new EnumerationItem(indent: 0, number: 1, inlines: new[] { new CleanTextInline("This should be item 1.") }),
+                                    new EnumerationItem(indent: 0, number: 2, inlines: new[] { new CleanTextInline("This should be the second item.")}),
+                                    new EnumerationItem(indent: 0, number: 1234, inlines: new[] { new CleanTextInline("Though, this should be item 3.")})
                                 }))))
             },
         };

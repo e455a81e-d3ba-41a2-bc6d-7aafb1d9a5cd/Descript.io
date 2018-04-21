@@ -63,7 +63,7 @@ module public MarkdownLexer =
     | LinkTextEndToken
     | LinkStartToken
     | LinkEndToken
-    | EnumerationToken of int
+    | EnumerationToken of indent: int * number: int
     | UnorderedEnumerationToken of indent : int * char
     | CodeBlockStartToken
     | CodeBlockEndToken
@@ -182,6 +182,8 @@ module public MarkdownLexer =
             | (LineBreak(CollapsedWhitespaces(c::CollapsedWhitespaces(t))), BlockquoteState, BlockquoteStack(_)::_) when c = '>' |> not -> Some(c::t, BlockquoteState, stack, output)
             | (LineBreak(LineBreak(t)), BlockquoteState, BlockquoteStack(_)::st)
             | (LineBreak(CollapsedWhitespaces(LineBreak(t))), BlockquoteState, BlockquoteStack(_)::st) -> Some(t, NewLine, st, output++NewLineToken)
+            | (LineBreak(LineBreak(t)), BlockquoteState, TextStack(txt)::BlockquoteStack(_)::st)
+            | (LineBreak(CollapsedWhitespaces(LineBreak(t))), BlockquoteState, TextStack(txt)::BlockquoteStack(_)::st) -> Some(t, NewLine, st, output@[TextToken(txt.BuildString());NewLineToken])
             | (LineBreak(t), BlockquoteState, BlockquoteStack(s)::st) -> Some(t, s, st, output)
             | ([], BlockquoteState, [BlockquoteStack(_); Z0]) -> Some([], NewLine, [Z0], output)
             | ([], BlockquoteState, BlockquoteStack(_)::t) -> Some([], BlockquoteState, t, output)
@@ -236,17 +238,40 @@ module public MarkdownLexer =
 
     let unorderedEnumerationRules(input, state, stack, output) =
         match (input, state, stack) with
-        | (EnumIndent(indent, IsUnorderedEnumerationToken(chr, ' '::t)), NewLine, [Z0]) -> Some(t, UnorderedEnumerationState, stack, output++UnorderedEnumerationToken(indent, chr))
-        | (LineBreak(EnumIndent(indent, IsUnorderedEnumerationToken(chr, ' '::t))), UnorderedEnumerationState, [Z0]) -> Some(t, UnorderedEnumerationState, stack, output++UnorderedEnumerationToken(indent, chr))
-        | (LineBreak(LineBreak(t)), UnorderedEnumerationState, [Z0]) -> Some(t, NewLine, stack, output++NewLineToken)
+        | (EnumIndent(indent, IsUnorderedEnumerationToken(chr, CollapsedWhitespaces(t))), NewLine, [Z0])
+            -> Some(t, UnorderedEnumerationState, stack, output++UnorderedEnumerationToken(indent, chr))
+
+        | (LineBreak(EnumIndent(indent, IsUnorderedEnumerationToken(chr, CollapsedWhitespaces(t)))), UnorderedEnumerationState, [Z0])
+            -> Some(t, UnorderedEnumerationState, stack, output++UnorderedEnumerationToken(indent, chr))
+
+        | (LineBreak(EnumIndent(indent, IsUnorderedEnumerationToken(chr, CollapsedWhitespaces(t)))), UnorderedEnumerationState, [TextStack(txt);Z0])
+            -> Some(t, UnorderedEnumerationState, [Z0], output@[TextToken(txt.BuildString());UnorderedEnumerationToken(indent, chr)])
+
+        | (LineBreak(LineBreak(t)), UnorderedEnumerationState, [TextStack(txt);Z0])
+            -> Some(t, NewLine, [Z0], output@[TextToken(txt.BuildString()); NewLineToken])
+
+        | (LineBreak(LineBreak(t)), UnorderedEnumerationState, [Z0])
+            -> Some(t, NewLine, stack, output++NewLineToken)
+
         | _ -> None;
     
     let enumerationRules : Rule list = [
             fun (input, state, stack, output) ->
                 match (input, state, stack) with
-                | (IntNumber(num, '.'::CollapsedWhitespaces(t)), NewLine, [Z0])
-                | (LineBreak(IntNumber(num, '.'::CollapsedWhitespaces(t))), EnumerationState, [Z0]) -> Some(t, EnumerationState, stack, output++EnumerationToken(num))
-                | (LineBreak(LineBreak(t)), EnumerationState, [Z0]) -> Some(t, NewLine, stack, output++NewLineToken)
+                | (EnumIndent(indent, IntNumber(number, '.'::CollapsedWhitespaces(t))), NewLine, [Z0])
+                    -> Some(t, EnumerationState, stack, output++EnumerationToken(indent, number))
+
+                | (LineBreak(EnumIndent(indent, IntNumber(number, '.'::CollapsedWhitespaces(t)))), EnumerationState, [Z0])
+                    -> Some(t, EnumerationState, stack, output++EnumerationToken(indent, number))
+
+                | (LineBreak(EnumIndent(indent, IntNumber(number, '.'::CollapsedWhitespaces(t)))), EnumerationState, [TextStack(txt);Z0])
+                    -> Some(t, EnumerationState, [Z0], output@[TextToken(txt.BuildString());EnumerationToken(indent, number)])
+
+                | (LineBreak(LineBreak(t)), EnumerationState, [TextStack(txt);Z0])
+                    -> Some(t, NewLine, [Z0], output@[TextToken(txt.BuildString()); NewLineToken])
+
+                | (LineBreak(LineBreak(t)), EnumerationState, [Z0])
+                    -> Some(t, NewLine, stack, output++NewLineToken)
                 | _ -> None;
         ]
 
@@ -261,9 +286,11 @@ module public MarkdownLexer =
     let imageHyperlinkRules : Rule list = [
             fun (input, state, stack, output) ->
                 match (input, state, stack) with
-                | ('!'::'['::t, InlineSupportedState st, _) -> Some(t, ImageAltState, ImageStack(st)::stack, output++ImageAltStartToken)
+                | ('!'::'['::t, InlineSupportedState s, TextStack(txt)::st) -> Some(t, ImageAltState, ImageStack(s)::st, output@[TextToken(txt.BuildString());ImageAltStartToken])
+                | ('!'::'['::t, InlineSupportedState s, _) -> Some(t, ImageAltState, ImageStack(s)::stack, output++ImageAltStartToken)
 
-                | ('['::t, InlineSupportedState st, _) -> Some(t, HyperlinkTextState, HyperlinkStack(st)::stack, output++LinkTextStartToken)
+                | ('['::t, InlineSupportedState s, TextStack(txt)::st) -> Some(t, HyperlinkTextState, HyperlinkStack(s)::st, output@[TextToken(txt.BuildString());LinkTextStartToken])
+                | ('['::t, InlineSupportedState s, _) -> Some(t, HyperlinkTextState, HyperlinkStack(s)::stack, output++LinkTextStartToken)
 
                 | (']'::'('::t, ImageAltState, TextStack(txt)::s) -> Some(t, LinkState, s, output++TextToken(txt.BuildString())++ImageAltEndToken++LinkStartToken)
                 | (']'::'('::t, HyperlinkTextState, TextStack(txt)::s) -> Some(t, LinkState, s, output++TextToken(txt.BuildString())++LinkTextEndToken++LinkStartToken)
@@ -289,6 +316,7 @@ module public MarkdownLexer =
             fun (input, state, stack, output) ->
                 match (input, state, stack) with
                 | ('`'::'`'::t, InlineCodeLiteralState, TextStack(txt)::InlineCodeStack(st)::s) -> Some(t, st, s, output++TextToken(txt.BuildString())++InlineCodeEndToken)
+                | ('`'::'`'::t, InlineSupportedState st, TextStack(txt)::s) -> Some(t, InlineCodeLiteralState, InlineCodeStack(st)::s, output++TextToken(txt.BuildString())++InlineCodeStartToken)
                 | ('`'::'`'::t, InlineSupportedState st, _) -> Some(t, InlineCodeLiteralState, InlineCodeStack(st)::stack, output++InlineCodeStartToken)
                 | (LineBreak(t), InlineCodeLiteralState, TextStack(txt)::s) -> Some(t, InlineCodeLiteralState, TextStack(txt++' ')::s, output)
                 | (LineBreak(t), InlineCodeState, TextStack(txt)::s) -> Some(t, InlineCodeState, TextStack(txt++' ')::s, output)
@@ -296,6 +324,7 @@ module public MarkdownLexer =
                 | (c::t, InlineCodeLiteralState, TextStack(txt)::s) -> Some(t, InlineCodeLiteralState, TextStack(txt++c)::s, output)
                 | (c::t, InlineCodeLiteralState, InlineCodeStack(_)::_) -> Some(t, InlineCodeLiteralState, TextStack([c])::stack, output)
                 | ('`'::t, InlineCodeState, TextStack(txt)::InlineCodeStack(st)::s) -> Some(t, st, s, output++TextToken(txt.BuildString())++InlineCodeEndToken)
+                | ('`'::t, InlineSupportedState st, TextStack(txt)::s) -> Some(t, InlineCodeState, InlineCodeStack(st)::s, output++TextToken(txt.BuildString())++InlineCodeStartToken)
                 | ('`'::t, InlineSupportedState st, _) -> Some(t, InlineCodeState, InlineCodeStack(st)::stack, output++InlineCodeStartToken)
                 | (LineBreak(t), InlineCodeState, TextStack(txt)::s) -> Some(t, state, TextStack(txt++' ')::s, output)
                 | (c::t, InlineCodeState, TextStack(txt)::s) -> Some(t, state, TextStack(txt++c)::s, output)
@@ -313,8 +342,10 @@ module public MarkdownLexer =
                 | (' '::'*'::_, InlineSupportedState _, TextStack(_)::_) 
                 | (' '::'_'::_, InlineSupportedState _, TextStack(_)::_) -> None
                 | ('*'::'*'::t, InlineSupportedState st, TextStack(txt)::StrongStack('*')::s) -> Some(t, st, s, output++TextToken(txt.BuildString())++StrongEndToken)
+                | ('*'::'*'::t, InlineSupportedState st, TextStack(txt)::s) -> Some(t, st, StrongStack('*')::s, output++TextToken(txt.BuildString())++StrongStartToken)
                 | ('*'::'*'::t, InlineSupportedState st, _) -> Some(t, st, StrongStack('*')::stack, output++StrongStartToken)
                 | ('_'::'_'::t, InlineSupportedState st, TextStack(txt)::StrongStack('_')::s) -> Some(t, st, s, output++TextToken(txt.BuildString())++StrongEndToken)
+                | ('_'::'_'::t, InlineSupportedState st, TextStack(txt)::s) -> Some(t, st, StrongStack('_')::s, output++TextToken(txt.BuildString())++StrongStartToken)
                 | ('_'::'_'::t, InlineSupportedState st, _) -> Some(t, st, StrongStack('_')::stack, output++StrongStartToken)
                 | (LineBreak(t), InlineSupportedState st, TextStack(txt)::StrongStack(_)::_) -> Some(t, st, TextStack(txt++' ')::stack.Tail, output)
                 | (c::t, InlineSupportedState st, TextStack(txt)::StrongStack(_)::_) -> Some(t, st, TextStack(txt++c)::stack.Tail, output)
@@ -326,8 +357,10 @@ module public MarkdownLexer =
             fun (input, state, stack, output) ->
                 match (input, state, stack) with
                 | ('*'::t, InlineSupportedState st, TextStack(txt)::EmphasisStack('*')::s) -> Some(t, st, s, output++TextToken(txt.BuildString())++EmphasisEndToken)
+                | ('*'::t, InlineSupportedState st, TextStack(txt)::s) -> Some(t, st, EmphasisStack('*')::s, output++TextToken(txt.BuildString())++EmphasisStartToken)
                 | ('*'::t, InlineSupportedState st, _) -> Some(t, st, EmphasisStack('*')::stack, output++EmphasisStartToken)
                 | ('_'::t, InlineSupportedState st, TextStack(txt)::EmphasisStack('_')::s) -> Some(t, st, s, output++TextToken(txt.BuildString())++EmphasisEndToken)
+                | ('_'::t, InlineSupportedState st, TextStack(txt)::s) -> Some(t, st, EmphasisStack('_')::s, output++TextToken(txt.BuildString())++EmphasisStartToken)
                 | ('_'::t, InlineSupportedState st, _) -> Some(t, st, EmphasisStack('_')::stack, output++EmphasisStartToken)
                 | (LineBreak(t), InlineSupportedState st, TextStack(txt)::EmphasisStack(_)::_) -> Some(t, st, TextStack(txt++' ')::stack.Tail, output)
                 | (c::t, InlineSupportedState st, TextStack(txt)::EmphasisStack(_)::_) -> Some(t, st, TextStack(txt++c)::stack.Tail, output)

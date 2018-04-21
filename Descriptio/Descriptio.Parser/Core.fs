@@ -6,6 +6,6 @@ module public Core =
         abstract member Lex : input:'TIn -> 'TOut option
 
     type public IParser<'T> =
-        abstract member Parse : input:'T -> IAbstractSyntaxTree option
+        abstract member Parse : input:'T -> IAbstractSyntaxTreeBlock option
 
     type public Parser<'TIn, 'TOut when 'TOut :> IAbstractSyntaxTree> = Parser of ('TIn -> 'TOut * 'TIn option)

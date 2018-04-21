@@ -3,8 +3,6 @@ using System.Text;
 using Descriptio.Core.AST;
 using Xunit;
 
-
-
 namespace Descriptio.Tests.IntegrationTests.HtmlFormatter
 {
     public class HtmlFormatterIntegrationTests
@@ -43,9 +41,9 @@ namespace Descriptio.Tests.IntegrationTests.HtmlFormatter
                                 next: new EnumerationBlock(
                                     items: new[]
                                     {
-                                        new EnumerationItem(1, new[] { new CleanTextInline("This should be item 1.") }),
-                                        new EnumerationItem(2, new[] { new CleanTextInline("This should be the second item.")}),
-                                        new EnumerationItem(3, new[] { new CleanTextInline("Though, this should be item 3.")})
+                                        new EnumerationItem(indent: 0, number: 1, inlines: new[] { new CleanTextInline("This should be item 1.") }),
+                                        new EnumerationItem(indent: 0, number: 2, inlines: new[] { new CleanTextInline("This should be the second item.")}),
+                                        new EnumerationItem(indent: 0, number: 3, inlines: new[] { new CleanTextInline("Though, this should be item 3.")})
                                     }
                                 )
                             )

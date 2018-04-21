@@ -212,6 +212,22 @@ namespace Descriptio.Tests.UnitTests
 
                 }
             },
+            new object[]
+            {
+                @"Here is an image: ![Hello World](img.jpg ""Title"")",
+                new[]
+                {
+                    Token.NewTextToken("Here is an image: "),
+                    Token.ImageAltStartToken,
+                    Token.NewTextToken("Hello World"),
+                    Token.ImageAltEndToken,
+                    Token.LinkStartToken,
+                    Token.NewTextToken("img.jpg"),
+                    Token.NewTextToken("Title"),
+                    Token.LinkEndToken
+
+                }
+            },
         };
 
         [Theory(DisplayName = "Lexer should lex image")]
@@ -262,6 +278,22 @@ namespace Descriptio.Tests.UnitTests
 
                 }
             },
+            new object[]
+            {
+                @"This is a link to [Hello World](http://example.com ""Example.com"")",
+                new[]
+                {
+                    Token.NewTextToken("This is a link to "),
+                    Token.LinkTextStartToken,
+                    Token.NewTextToken("Hello World"),
+                    Token.LinkTextEndToken,
+                    Token.LinkStartToken,
+                    Token.NewTextToken("http://example.com"),
+                    Token.NewTextToken("Example.com"),
+                    Token.LinkEndToken
+
+                }
+            },
         };
 
         [Theory(DisplayName = "Lexer should lex hyperlinks")]
@@ -289,7 +321,7 @@ namespace Descriptio.Tests.UnitTests
                 "1. abc",
                 new[]
                 {
-                    Token.NewEnumerationToken(1),
+                    Token.NewEnumerationToken(0, 1),
                     Token.NewTextToken("abc"),
                 }
             },
@@ -298,7 +330,7 @@ namespace Descriptio.Tests.UnitTests
                 "1. *abc* **def** `ghi`",
                 new[]
                 {
-                    Token.NewEnumerationToken(1),
+                    Token.NewEnumerationToken(0, 1),
                     Token.EmphasisStartToken,
                     Token.NewTextToken("abc"),
                     Token.EmphasisEndToken,
@@ -319,11 +351,11 @@ namespace Descriptio.Tests.UnitTests
 214781. test",
                 new[]
                 {
-                    Token.NewEnumerationToken(3),
+                    Token.NewEnumerationToken(0, 3),
                     Token.NewTextToken("def"),
-                    Token.NewEnumerationToken(1),
+                    Token.NewEnumerationToken(0, 1),
                     Token.NewTextToken("test"),
-                    Token.NewEnumerationToken(214781),
+                    Token.NewEnumerationToken(0, 214781),
                     Token.NewTextToken("test"),
                 }
             },
