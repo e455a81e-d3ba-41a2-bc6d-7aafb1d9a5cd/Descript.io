@@ -25,8 +25,9 @@ namespace Descriptio.Transform.Latex
 
         public void Visit(TextParagraphBlock textParagraphBlock)
         {
-            _streamWriter.WriteLine(@"\paragraph{}");
+            _streamWriter.WriteLine(@"\begin{paragraph}{}");
             FormatInlines(textParagraphBlock.Inlines);
+            _streamWriter.WriteLine(@"\end{paragraph}");
         }
 
         public void Visit(EnumerationBlock enumerationBlock)
@@ -34,7 +35,7 @@ namespace Descriptio.Transform.Latex
             _streamWriter.WriteLine(@"\begin{itemize}");
             foreach (var item in enumerationBlock.Items)
             {
-                _streamWriter.Write($"\\item[{item.Number}]");
+                _streamWriter.Write($"\\item [{item.Number}] ");
                 FormatInlines(item.Inlines);
             }
             _streamWriter.WriteLine(@"\end{itemize}");
@@ -46,6 +47,7 @@ namespace Descriptio.Transform.Latex
             {
                 inline.Accept(_inlineVisitor);
             }
+            _streamWriter.WriteLine();
         }
     }
 }
