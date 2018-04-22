@@ -18,8 +18,4 @@
     <ProjectReference Include="..\Descriptio.Core\Descriptio.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Xml\" />
-  </ItemGroup>
-
 </Project>
