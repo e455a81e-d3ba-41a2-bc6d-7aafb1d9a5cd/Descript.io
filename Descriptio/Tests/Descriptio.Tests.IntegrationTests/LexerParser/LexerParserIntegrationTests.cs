@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
 using Descriptio.Core.AST;
-using Descriptio.Parser;
+using Descriptio.Factories;
 using Descriptio.Tests.FluentAssertionsExtensions;
 using FluentAssertions;
 using Xunit;
-
-using static Descriptio.Parser.MarkdownLexer;
 
 // ReSharper disable InconsistentNaming
 
@@ -16,6 +14,9 @@ namespace Descriptio.Tests.IntegrationTests.LexerParser
     [Trait("Type", "Markdown.TextLexer")]
     public class LexerParserIntegrationTests
     {
+        private readonly LexerFactory _lexerFactory = new LexerFactory();
+        private readonly ParserFactory _parserFactory = new ParserFactory();
+
         public static readonly IEnumerable<object[]> LexerParser_string_ShouldYieldDocument_Data = new[]
         {
             new object[]
@@ -80,14 +81,14 @@ and an image ![Alt](C:\Path\To\An\Image.jpg, ""It has a title too"")
         public void LexerParser_string_ShouldYieldDocument(string input, IAbstractSyntaxTree expected)
         {
             // Arrange
-            var lexer = new TextLexer();
-            var parser = new MarkdownParser.MarkdownParser();
+            var lexer = _lexerFactory.CreateMarkdownTextLexerWithDefaultRules();
+            var parser = _parserFactory.CreateMarkdownParserWithDefaultRules();
 
             // Act & Assert
             var lexerResult = lexer.Lex(input);
             lexerResult.Should().BeSome();
 
-            var (_, _, _, output) = lexerResult.Value;
+            var output = lexerResult.Value;
             var parserResult = parser.Parse(output);
             parserResult.Should().BeSome().And.Subject.Value.Should().Be(expected);
         }

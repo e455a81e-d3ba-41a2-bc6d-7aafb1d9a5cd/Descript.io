@@ -20,7 +20,6 @@ namespace Descriptio.Transform.Json
                 }
                 streamWriter.Flush();
             }
-            stream.Seek(0, SeekOrigin.Begin);
         }
     }
 }

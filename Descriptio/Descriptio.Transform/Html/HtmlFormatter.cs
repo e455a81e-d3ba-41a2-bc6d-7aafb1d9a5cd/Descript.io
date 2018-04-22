@@ -19,7 +19,6 @@ namespace Descriptio.Transform.Html
                 }
                 streamWriter.Flush();
             }
-            stream.Seek(0, SeekOrigin.Begin);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Descriptio.Factories;
 using Descriptio.Tests.FluentAssertionsExtensions;
 using FluentAssertions;
 using Xunit;
@@ -14,13 +15,15 @@ namespace Descriptio.Tests.UnitTests
     [Trait("Type", "Markdown.TextLexer")]
     public class MarkdownLexerTests
     {
+        private readonly LexerFactory _lexerFactory = new LexerFactory();
+
         [Theory(DisplayName = "Lexer should lex title")]
         [InlineData("# Title", "Title", 1, 0)]
         [InlineData("## Level 2 ###", "Level 2", 2, 3)]
         public void Lexer_Title_ShouldReturnTitle(string source, string expectedTitle, int expectedLevel, int expectedClosingTokenCount)
         {
             // Arrange
-            var lexer = new TextLexer();
+            var lexer = _lexerFactory.CreateMarkdownTextLexerWithDefaultRules();
 
             // Act
             var result = lexer.Lex(source);
@@ -33,8 +36,8 @@ namespace Descriptio.Tests.UnitTests
 
             result.Should()
                   .BeSome()
-                  .And.Subject.Value.Item4
-                  .Should<Token>()
+                  .And.Subject.Value
+                  .Should()
                   .Equal(expectedTokens);
         }
 
@@ -54,7 +57,7 @@ namespace Descriptio.Tests.UnitTests
         public void Lexer_LineBreak_ShouldReturnLines(string source, Token[] expectedTokens)
         {
             // Arrange
-            var lexer = new TextLexer();
+            var lexer = _lexerFactory.CreateMarkdownTextLexerWithDefaultRules();
 
             // Act
             var result = lexer.Lex(source);
@@ -62,8 +65,8 @@ namespace Descriptio.Tests.UnitTests
             // Assert
             result.Should()
                   .BeSome()
-                  .And.Subject.Value.Item4
-                  .Should<Token>()
+                  .And.Subject.Value
+                  .Should()
                   .Equal(expectedTokens);
         }
 
@@ -86,7 +89,7 @@ namespace Descriptio.Tests.UnitTests
         public void Lexer_Emphasis_ShouldReturnEmphasisTokens(string source, Token[] expectedTokens)
         {
             // Arrange
-            var lexer = new TextLexer();
+            var lexer = _lexerFactory.CreateMarkdownTextLexerWithDefaultRules();
 
             // Act
             var result = lexer.Lex(source);
@@ -94,8 +97,8 @@ namespace Descriptio.Tests.UnitTests
             // Assert
             result.Should()
                   .BeSome()
-                  .And.Subject.Value.Item4
-                  .Should<Token>()
+                  .And.Subject.Value
+                  .Should()
                   .Equal(expectedTokens);
         }
 
@@ -118,7 +121,7 @@ namespace Descriptio.Tests.UnitTests
         public void Lexer_Strong_ShouldReturnStrongTokens(string source, Token[] expectedTokens)
         {
             // Arrange
-            var lexer = new TextLexer();
+            var lexer = _lexerFactory.CreateMarkdownTextLexerWithDefaultRules();
 
             // Act
             var result = lexer.Lex(source);
@@ -126,8 +129,8 @@ namespace Descriptio.Tests.UnitTests
             // Assert
             result.Should()
                   .BeSome()
-                  .And.Subject.Value.Item4
-                  .Should<Token>()
+                  .And.Subject.Value
+                  .Should()
                   .Equal(expectedTokens);
         }
 
@@ -145,7 +148,7 @@ namespace Descriptio.Tests.UnitTests
         public void Lexer_InlineCode_ShouldReturnInlineCodeTokens(string source, Token[] expectedTokens)
         {
             // Arrange
-            var lexer = new TextLexer();
+            var lexer = _lexerFactory.CreateMarkdownTextLexerWithDefaultRules();
 
             // Act
             var result = lexer.Lex(source);
@@ -153,8 +156,8 @@ namespace Descriptio.Tests.UnitTests
             // Assert
             result.Should()
                   .BeSome()
-                  .And.Subject.Value.Item4
-                  .Should<Token>()
+                  .And.Subject.Value
+                  .Should()
                   .Equal(expectedTokens);
         }
 
@@ -169,7 +172,7 @@ namespace Descriptio.Tests.UnitTests
         public void Lexer_TextLine_ShouldLexIndentationCorrectly(string source, Token[] expectedTokens)
         {
             // Arrange
-            var lexer = new TextLexer();
+            var lexer = _lexerFactory.CreateMarkdownTextLexerWithDefaultRules();
 
             // Act
             var result = lexer.Lex(source);
@@ -177,8 +180,8 @@ namespace Descriptio.Tests.UnitTests
             // Assert
             result.Should()
                   .BeSome()
-                  .And.Subject.Value.Item4
-                  .Should<Token>()
+                  .And.Subject.Value
+                  .Should()
                   .Equal(expectedTokens);
         }
         
@@ -235,7 +238,7 @@ namespace Descriptio.Tests.UnitTests
         public void Lexer_Image_ShouldReturnImageTokens(string source, Token[] expectedTokens)
         {
             // Arrange
-            var lexer = new TextLexer();
+            var lexer = _lexerFactory.CreateMarkdownTextLexerWithDefaultRules();
 
             // Act
             var result = lexer.Lex(source);
@@ -243,8 +246,8 @@ namespace Descriptio.Tests.UnitTests
             // Assert
             result.Should()
                   .BeSome()
-                  .And.Subject.Value.Item4
-                  .Should<Token>()
+                  .And.Subject.Value
+                  .Should()
                   .Equal(expectedTokens);
         }
         
@@ -301,7 +304,7 @@ namespace Descriptio.Tests.UnitTests
         public void Lexer_Hyperlink_ShouldReturnHyperlinkTokens(string source, Token[] expectedTokens)
         {
             // Arrange
-            var lexer = new TextLexer();
+            var lexer = _lexerFactory.CreateMarkdownTextLexerWithDefaultRules();
 
             // Act
             var result = lexer.Lex(source);
@@ -309,8 +312,8 @@ namespace Descriptio.Tests.UnitTests
             // Assert
             result.Should()
                   .BeSome()
-                  .And.Subject.Value.Item4
-                  .Should<Token>()
+                  .And.Subject.Value
+                  .Should()
                   .Equal(expectedTokens);
         }
         
@@ -366,7 +369,7 @@ namespace Descriptio.Tests.UnitTests
         public void Lexer_Enumeration_ShouldReturnEnumerationTokens(string source, Token[] expectedTokens)
         {
             // Arrange
-            var lexer = new TextLexer();
+            var lexer = _lexerFactory.CreateMarkdownTextLexerWithDefaultRules();
 
             // Act
             var result = lexer.Lex(source);
@@ -374,8 +377,8 @@ namespace Descriptio.Tests.UnitTests
             // Assert
             result.Should()
                   .BeSome()
-                  .And.Subject.Value.Item4
-                  .Should<Token>()
+                  .And.Subject.Value
+                  .Should()
                   .Equal(expectedTokens);
         }
         
@@ -412,7 +415,7 @@ namespace Descriptio.Tests.UnitTests
         public void Lexer_UnorderedEnumeration_ShouldReturnEnumerationTokens(string source, Token[] expectedTokens)
         {
             // Arrange
-            var lexer = new TextLexer();
+            var lexer = _lexerFactory.CreateMarkdownTextLexerWithDefaultRules();
 
             // Act
             var result = lexer.Lex(source);
@@ -420,8 +423,8 @@ namespace Descriptio.Tests.UnitTests
             // Assert
             result.Should()
                   .BeSome()
-                  .And.Subject.Value.Item4
-                  .Should<Token>()
+                  .And.Subject.Value
+                  .Should()
                   .Equal(expectedTokens);
         }
         
@@ -459,7 +462,7 @@ int i = 0;
         public void Lexer_CodeBlock_ShouldReturnCodeBlockTokens(string source, Token[] expectedTokens)
         {
             // Arrange
-            var lexer = new TextLexer();
+            var lexer = _lexerFactory.CreateMarkdownTextLexerWithDefaultRules();
 
             // Act
             var result = lexer.Lex(source);
@@ -467,8 +470,8 @@ int i = 0;
             // Assert
             result.Should()
                   .BeSome()
-                  .And.Subject.Value.Item4
-                  .Should<Token>()
+                  .And.Subject.Value
+                  .Should()
                   .Equal(expectedTokens);
         }
         
@@ -528,7 +531,7 @@ int i = 0;
         public void Lexer_Blockquote_ShouldReturnBlockquoteTokens(string source, Token[] expectedTokens)
         {
             // Arrange
-            var lexer = new TextLexer();
+            var lexer = _lexerFactory.CreateMarkdownTextLexerWithDefaultRules();
 
             // Act
             var result = lexer.Lex(source);
@@ -536,8 +539,8 @@ int i = 0;
             // Assert
             result.Should()
                   .BeSome()
-                  .And.Subject.Value.Item4
-                  .Should<Token>()
+                  .And.Subject.Value
+                  .Should()
                   .Equal(expectedTokens);
         }
     }

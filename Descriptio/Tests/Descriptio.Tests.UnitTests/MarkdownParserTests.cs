@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Descriptio.Core.AST;
-using Descriptio.Parser;
+using Descriptio.Factories;
 using Descriptio.Tests.FluentAssertionsExtensions;
 using Microsoft.FSharp.Core;
 using Xunit;
@@ -15,6 +15,8 @@ namespace Descriptio.Tests.UnitTests
     [Trait("Type", "Markdown.TextParser")]
     public class MarkdownParserTests
     {
+        private readonly ParserFactory _parserFactory = new ParserFactory();
+
         public static readonly IEnumerable<object[]> Parser_AtxTitle_ShouldReturnTitle_Data = new[]
         {
             new object[]{ new[] { Token.TitleLevelToken, Token.NewTitleToken("Title 1") }, new TitleAst(text: "Title 1")},
@@ -27,7 +29,7 @@ namespace Descriptio.Tests.UnitTests
         public void Parser_AtxTitle_ShouldReturnTitle(Token[] source, FSharpOption<IAbstractSyntaxTreeBlock> expected)
         {
             // Arrange
-            var parser = new MarkdownParser.MarkdownParser();
+            var parser = _parserFactory.CreateMarkdownParserWithDefaultRules();
 
             // Act
             var result = parser.Parse(source);
@@ -164,7 +166,7 @@ namespace Descriptio.Tests.UnitTests
         public void Parser_TextLine_ShouldReturnTextLine(Token[] source, FSharpOption<IAbstractSyntaxTreeBlock> expected)
         {
             // Arrange
-            var parser = new MarkdownParser.MarkdownParser();
+            var parser = _parserFactory.CreateMarkdownParserWithDefaultRules();
 
             // Act
             var result = parser.Parse(source);
@@ -214,7 +216,7 @@ namespace Descriptio.Tests.UnitTests
         public void Parser_Enumeration_ShouldReturnEnumeration(Token[] source, FSharpOption<IAbstractSyntaxTreeBlock> expected)
         {
             // Arrange
-            var parser = new MarkdownParser.MarkdownParser();
+            var parser = _parserFactory.CreateMarkdownParserWithDefaultRules();
 
             // Act
             var result = parser.Parse(source);
@@ -257,7 +259,7 @@ namespace Descriptio.Tests.UnitTests
         public void Parser_CodeBlock_ShouldReturnCodeBlock(Token[] source, FSharpOption<IAbstractSyntaxTreeBlock> expected)
         {
             // Arrange
-            var parser = new MarkdownParser.MarkdownParser();
+            var parser = _parserFactory.CreateMarkdownParserWithDefaultRules();
 
             // Act
             var result = parser.Parse(source);
@@ -314,7 +316,7 @@ namespace Descriptio.Tests.UnitTests
         public void Parser_Blockquote_ShouldReturnBlockquote(Token[] source, FSharpOption<IAbstractSyntaxTreeBlock> expected)
         {
             // Arrange
-            var parser = new MarkdownParser.MarkdownParser();
+            var parser = _parserFactory.CreateMarkdownParserWithDefaultRules();
 
             // Act
             var result = parser.Parse(source);

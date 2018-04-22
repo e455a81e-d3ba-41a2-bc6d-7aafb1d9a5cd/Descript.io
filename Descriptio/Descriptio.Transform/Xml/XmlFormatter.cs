@@ -22,7 +22,6 @@ namespace Descriptio.Transform.Xml
                 writer.WriteEndElement();
                 writer.Flush();
             }
-            stream.Seek(0, SeekOrigin.Begin);
         }
     }
 }
