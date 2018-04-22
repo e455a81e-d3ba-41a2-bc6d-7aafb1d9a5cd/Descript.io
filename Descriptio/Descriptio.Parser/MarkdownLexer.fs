@@ -6,6 +6,7 @@ open System.Text
 open Descriptio.Parser.Core
 
 module public MarkdownLexer =
+    open System.Collections.Generic
 
     /// <summary>
     /// Represents the state of the lexer.
@@ -94,45 +95,18 @@ module public MarkdownLexer =
     let (|ImgLinkTitle|_|) = CharSeqUntil ['"']
     let (|LinkHrefChars|_|) = CharSeqUntil [' '; ')']
     let (|ImgOrLinkStack|_|) stack = match stack with ImageStack(st)::t | HyperlinkStack(st)::t -> Some(st, t) | _ -> None
-
-    
-    let (|StrongSupportedStack|_|) stack =
-        match stack with
-        | Z0::st | TextStack(_)::st | EmphasisStack(_)::st -> Some(st)
-        | _ -> None
-
-    let (|IsUnorderedEnumerationToken|_|) input =
-        match input with
-        | '*'::t -> Some('*', t)
-        | '+'::t -> Some('+', t)
-        | '-'::t -> Some('-', t)
-        | _ -> None
+    let (|StrongSupportedStack|_|) stack = match stack with Z0::st | TextStack(_)::st | EmphasisStack(_)::st -> Some(st) | _ -> None
+    let (|IsUnorderedEnumerationToken|_|) input = match input with '*'::t -> Some('*', t) | '+'::t -> Some('+', t) | '-'::t -> Some('-', t) | _ -> None
     
     let (|EnumIndent|_|) =
-        let rec enumIndent level input =
-            match input with
-            | '\t'::t
-            | ' '::' '::' '::' '::t -> enumIndent (level+1) t
-            | _ -> Some(level, input)
-        
+        let rec enumIndent level input = match input with '\t'::t | ' '::' '::' '::' '::t -> enumIndent (level+1) t | _ -> Some(level, input)
         enumIndent 0
 
-    let (|LineBreak|_|) input =
-        match input with
-        | '\r'::'\n'::t
-        | '\r'::t
-        | '\n'::t -> Some t
-        | _ -> None
-
+    let (|LineBreak|_|) input = match input with '\r'::'\n'::t | '\r'::t | '\n'::t -> Some t | _ -> None
     let (|Escaped|_|) input = match input with '\\'::c::t -> Some(c, t) | _ -> None
 
     let (|CollapsedWhitespaces|_|) =
-        let rec collapseWhitespace hasWhitespace input =
-            match input with
-            | ' '::t -> collapseWhitespace true t
-            | _ when hasWhitespace -> Some(input)
-            | _ -> None
-        
+        let rec collapseWhitespace hasWhitespace input = match input with  ' '::t -> collapseWhitespace true t | _ when hasWhitespace -> Some(input) | _ -> None
         collapseWhitespace false
 
     let (|InlineSupportedState|_|) state =
@@ -144,12 +118,6 @@ module public MarkdownLexer =
         | BlockquoteState -> Some state
         | _ -> None
 
-    let (|BlockquoteSupportedState|_|) state =
-        match state with
-        | NewLine
-        | BlockquoteState -> Some state
-        | _ -> None
-
     let (|InlineState|_|) state =
         match state with
         | TextLine
@@ -158,11 +126,8 @@ module public MarkdownLexer =
         | UnorderedEnumerationState -> Some state
         | _ -> None
 
-    let (|TitleSupportedState|_|) state =
-        match state with
-        | NewLine
-        | BlockquoteState -> Some state
-        | _ -> None
+    let (|BlockquoteSupportedState|_|) state = match state with NewLine | BlockquoteState -> Some state | _ -> None
+    let (|TitleSupportedState|_|) state = match state with NewLine | BlockquoteState -> Some state | _ -> None
 
     let (|IntNumber|_|) input =
         let rec GetIntNumber (input : char list) (digits : string) =
@@ -387,7 +352,7 @@ module public MarkdownLexer =
                 | _ -> None;
         ]
 
-    let rules : Rule list =
+    let LexerDefaultRules : Rule list =
         textLineRules
         |> List.append emphasisRules
         |> List.append strongRules
@@ -398,16 +363,19 @@ module public MarkdownLexer =
         |> List.append (titleRules++CodeBlockRules)
         |> List.append BlockquoteRules
 
-    type public TextLexer() =
+    type public TextLexer(rules: IEnumerable<Rule>) =
         let rec lexer (inp, state, stack, output) =
             rules
             |> Seq.map (fun r -> r(inp, state, stack, output))
             |> Seq.filter Option.isSome
             |> Seq.map (fun r -> match r.Value with
-                                  | ([], _, [Z0], _) -> Some(r.Value |> TupleExtensions.ToValueTuple)
+                                  | ([], _, [Z0], _) -> r.Value |> TupleExtensions.ToValueTuple |> Some
                                   | _ -> lexer r.Value)
             |> Seq.tryPick (fun s -> s)
         
         member public this.Lex input = (this :> ILexer<_, _>).Lex input
-        interface ILexer<string, struct(char list * State * StackSymbols list * Token list)> with
-            member __.Lex input = lexer (input.ToCharArray() |> Array.toList, NewLine, [Z0], [])
+        interface ILexer<string, Token seq> with
+            member __.Lex input = 
+                match lexer (input.ToCharArray() |> Array.toList, NewLine, [Z0], []) with
+                | Some struct (_, _, _, output) -> output :> Token seq |> Some
+                | _ -> None

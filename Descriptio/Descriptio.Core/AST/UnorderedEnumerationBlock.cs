@@ -35,7 +35,7 @@ namespace Descriptio.Core.AST
 
         public bool Equals(UnorderedEnumerationBlock other)
             => ReferenceEquals(this, other)
-               || !ReferenceEquals(null, other)
+               || !(other is null)
                && Items.IsEquivalentTo(other.Items)
                && Equals(Next, other.Next);
 

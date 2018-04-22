@@ -27,7 +27,7 @@ namespace Descriptio.Core.AST
 
         public bool Equals(UnorderedEnumerationItem other)
             => ReferenceEquals(this, other)
-               || !ReferenceEquals(other, null)
+               || !(other is null)
                && Indent == other.Indent
                && Bullet == other.Bullet
                && Inlines.IsEquivalentTo(other.Inlines);

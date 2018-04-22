@@ -264,7 +264,7 @@ module public MarkdownParser =
         | Some (asts, t) -> Some(EnumerationBlock(asts) :> IAbstractSyntaxTreeBlock, t)
         | _ -> None
 
-    let rules : (Token list -> (IAbstractSyntaxTreeBlock * Token list) option) list = [
+    let ParserDefaultRules : ParserRule list = [
             ParseAtxTitle;
             ParseBlockquote;
             ParseCodeBlock;
@@ -273,7 +273,7 @@ module public MarkdownParser =
             ParseTextParagraph;
         ]
 
-    type public MarkdownParser() =
+    type public Parser(rules: ParserRule seq) =
         let rec parse inp =
             rules
             |> Seq.map (fun r -> r inp)

@@ -36,7 +36,7 @@ namespace Descriptio.Core.AST
 
         public virtual bool Equals(BlockquoteBlock other)
             => ReferenceEquals(this, other)
-               || !ReferenceEquals(null, other)
+               || !(other is null)
                && Equals(Next, other.Next)
                && Inlines.IsEquivalentTo(other.Inlines);
 

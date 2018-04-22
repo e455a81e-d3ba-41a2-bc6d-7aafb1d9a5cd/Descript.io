@@ -40,7 +40,7 @@ namespace Descriptio.Core.AST
 
         public virtual bool Equals(CodeBlock other)
             => ReferenceEquals(this, other)
-               || !ReferenceEquals(null, other)
+               || !(other is null)
                && Equals(Next, other.Next)
                && Lines.IsEquivalentTo(other.Lines)
                && string.Equals(Language, other.Language);
