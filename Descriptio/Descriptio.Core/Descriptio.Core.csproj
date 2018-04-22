@@ -15,6 +15,9 @@
     <PackageLicenseUrl>https://raw.githubusercontent.com/LariscusObscurus/Descript.io/master/LICENSE</PackageLicenseUrl>
     <Copyright>© 2018 David Eiwen, Sandra Schneider, Leonhardt Schwartz</Copyright>
     <PackageTags>markdown parser transform document</PackageTags>
+    <Description>A library for customizable parsing of markdown documents and transforming into other formats.
+
+This package contains the structure of the abstract syntax tree.</Description>
   </PropertyGroup>
 
   <ItemGroup>

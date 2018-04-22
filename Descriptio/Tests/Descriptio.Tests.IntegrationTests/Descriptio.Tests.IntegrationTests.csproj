@@ -17,6 +17,7 @@
     <ProjectReference Include="..\..\Descriptio.Parser\Descriptio.Parser.fsproj" />
     <ProjectReference Include="..\..\Descriptio.Tests.FluentAssertionsExtensions\Descriptio.Tests.FluentAssertionsExtensions.csproj" />
     <ProjectReference Include="..\..\Descriptio.Transform\Descriptio.Transform.csproj" />
+    <ProjectReference Include="..\..\Descriptio\Descriptio.csproj" />
   </ItemGroup>
 
 </Project>

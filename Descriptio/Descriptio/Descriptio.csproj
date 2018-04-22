@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Version>1.0.0-alpha002</Version>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/LariscusObscurus/Descript.io/nuget/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/LariscusObscurus/Descript.io/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/LariscusObscurus/Descript.io</PackageProjectUrl>
     <RepositoryUrl>https://github.com/LariscusObscurus/Descript.io</RepositoryUrl>
     <Authors>David Eiwen, Sandra Schneider, Leonhardt Schwartz</Authors>
@@ -13,6 +13,11 @@
     <Product>Descript.io</Product>
     <RepositoryType>git</RepositoryType>
     <PackageTags>markdown parser transform document</PackageTags>
+    <Description>A library for customizable parsing of markdown documents and transforming into other formats.
+
+Install this package to include all Descript.io subpackages (Core, Parser, Transform)
+
+This package contains the Fluent API as well as the Factory API for Descript.io</Description>
   </PropertyGroup>
 
   <ItemGroup>

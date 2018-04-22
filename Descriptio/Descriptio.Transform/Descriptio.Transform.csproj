@@ -12,6 +12,9 @@
     <RepositoryUrl>https://github.com/LariscusObscurus/Descript.io</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>markdown parser transform document</PackageTags>
+    <Description>A library for customizable parsing of markdown documents and transforming into other formats.
+
+This package contains the formatters for HTML, LaTex, XML and JSON.</Description>
   </PropertyGroup>
 
   <ItemGroup>
