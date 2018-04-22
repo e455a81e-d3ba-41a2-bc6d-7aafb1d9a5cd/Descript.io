@@ -228,7 +228,6 @@ namespace Descriptio.Tests.UnitTests
                     Token.NewTextToken("img.jpg"),
                     Token.NewTextToken("Title"),
                     Token.LinkEndToken
-
                 }
             },
         };
@@ -278,7 +277,6 @@ namespace Descriptio.Tests.UnitTests
                     Token.NewTextToken("http://example.com"),
                     Token.NewTextToken("Example.com"),
                     Token.LinkEndToken
-
                 }
             },
             new object[]
@@ -294,7 +292,6 @@ namespace Descriptio.Tests.UnitTests
                     Token.NewTextToken("http://example.com"),
                     Token.NewTextToken("Example.com"),
                     Token.LinkEndToken
-
                 }
             },
         };

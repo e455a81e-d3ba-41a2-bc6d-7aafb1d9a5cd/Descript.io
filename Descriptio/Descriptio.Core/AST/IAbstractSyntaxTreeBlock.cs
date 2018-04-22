@@ -2,7 +2,6 @@
 {
     public interface IAbstractSyntaxTreeBlock : IAbstractSyntaxTree
     {
-
         IAbstractSyntaxTreeBlock Next { get; }
 
         IAbstractSyntaxTreeBlock SetNext(IAbstractSyntaxTreeBlock next);
