@@ -2,6 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>David Eiwen, Sandra Schneider, Leonhardt Schwartz</Authors>
+    <Version>1.0.0-alpha002</Version>
+    <Company />
+    <Product>Descript.io</Product>
+    <Copyright>© 2018 David Eiwen, Sandra Schneider, Leonhardt Schwartz</Copyright>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/LariscusObscurus/Descript.io/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/LariscusObscurus/Descript.io</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/LariscusObscurus/Descript.io</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>markdown parser transform document</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
