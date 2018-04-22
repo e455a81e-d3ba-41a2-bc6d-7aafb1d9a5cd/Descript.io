@@ -19,17 +19,22 @@ namespace Descriptio
 
         public FSharpOption<IAbstractSyntaxTreeBlock> ParserResult { get; }
 
-        public string AndFormatToLaTexString() => FromStream(_formatterFactory.CreateLaTexFormatterWithDefaultRules());
+        public string AndFormatToLaTexString() => AndFormatToStringUsing(_formatterFactory.CreateLaTexFormatterWithDefaultRules());
 
-        public string AndFormatToHtmlString() => FromStream(_formatterFactory.CreateHtmlFormatterWithDefaultRules());
+        public string AndFormatToHtmlString() => AndFormatToStringUsing(_formatterFactory.CreateHtmlFormatterWithDefaultRules());
 
-        public string AndFormatToXmlString() => FromStream(_formatterFactory.CreateXmlFormatterWithDefaultRules());
+        public string AndFormatToXmlString() => AndFormatToStringUsing(_formatterFactory.CreateXmlFormatterWithDefaultRules());
 
-        public string AndFormatToStringUsing(IFormatter formatter) => FromStream(formatter ?? throw new ArgumentNullException(nameof(formatter)));
+        public string AndFormatToJsonString() => AndFormatToStringUsing(_formatterFactory.CreateJsonFormatterWithDefaultRules());
 
-        protected string FromStream(IFormatter formatter)
+        public string AndFormatToStringUsing(IFormatter formatter)
         {
             ThrowIfCannotFormat();
+
+            if (formatter is null)
+            {
+                throw new ArgumentNullException(nameof(formatter));
+            }
 
             using (var targetStream = new MemoryStream())
             {

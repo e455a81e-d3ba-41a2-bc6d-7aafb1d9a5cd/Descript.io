@@ -1,7 +1,11 @@
-﻿using Descriptio.Core.AST;
+﻿using System;
+using System.Collections.Generic;
+using Descriptio.Core.AST;
 using Descriptio.Extensions;
 using Descriptio.Factories;
 using Microsoft.FSharp.Core;
+using static Descriptio.Parser.Core;
+using static Descriptio.Parser.MarkdownLexer;
 
 namespace Descriptio
 {
@@ -11,9 +15,15 @@ namespace Descriptio
         private static readonly ParserFactory ParserFactory = new ParserFactory();
 
         public static ParseResult MarkdownString(string input)
+            => MarkdownStringUsing(
+                LexerFactory.CreateMarkdownTextLexerWithDefaultRules(),
+                ParserFactory.CreateMarkdownParserWithDefaultRules(),
+                input);
+
+        public static ParseResult MarkdownStringUsing(ILexer<string, IEnumerable<Token>> lexer, IParser<IEnumerable<Token>> parser, string input)
         {
-            var lexer = LexerFactory.CreateMarkdownTextLexerWithDefaultRules();
-            var parser = ParserFactory.CreateMarkdownParserWithDefaultRules();
+            if (lexer is null) throw new ArgumentNullException(nameof(lexer));
+            if (parser is null) throw new ArgumentNullException(nameof(parser));
 
             var lexerResult = lexer.Lex(input);
             if (lexerResult.IsSome())
