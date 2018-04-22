@@ -35,6 +35,7 @@ namespace Descriptio.Tests.IntegrationTests.LatexFormatter
             
             var memoryStream = new MemoryStream();
             latexFormatter.Transform(parserResult.Value, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {

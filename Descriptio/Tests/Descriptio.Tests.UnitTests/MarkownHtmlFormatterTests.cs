@@ -1,19 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using Descriptio.Core.AST;
-using Descriptio.Transform.Html;
+using Descriptio.Factories;
 using Xunit;
 
 namespace Descriptio.Tests.UnitTests
 {
     public class MarkownHtmlFormatterTests
     {
+        private readonly FormatterFactory _formatterFactory = new FormatterFactory();
+
         [Fact]
         public void HtmlFormatter_ShouldReturnTitle()
         {
-            var htmlFormatter = new HtmlFormatter();
+            var htmlFormatter = _formatterFactory.CreateHtmlFormatterWithDefaultRules();
 
             var ast = new TitleAst(
                 "Title 1",
@@ -25,19 +25,19 @@ namespace Descriptio.Tests.UnitTests
 
             var memoryStream = new MemoryStream();
             htmlFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {
                 var result = streamReader.ReadToEnd();
                 Assert.Equal(expectedResult, result);
             }
-
         }
 
         [Fact]
         public void HtmlFormatter_ShouldReturnTextLine()
         {
-            var htmlFormatter = new HtmlFormatter();
+            var htmlFormatter = _formatterFactory.CreateHtmlFormatterWithDefaultRules();
 
             var ast = new TextParagraphBlock(new[]
             {
@@ -50,6 +50,7 @@ This is a text.</p>
 
             var memoryStream = new MemoryStream();
             htmlFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {
@@ -61,7 +62,7 @@ This is a text.</p>
         [Fact]
         public void HtmlFormatter_ShouldReturnEmphasis()
         {
-            var htmlFormatter = new HtmlFormatter();
+            var htmlFormatter = _formatterFactory.CreateHtmlFormatterWithDefaultRules();
 
             var ast = new TextParagraphBlock(new IAbstractSyntaxTreeInline[]
             {
@@ -75,6 +76,7 @@ This is a text. <em>This should be emphasized.</em></p>
 
             var memoryStream = new MemoryStream();
             htmlFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {
@@ -86,7 +88,7 @@ This is a text. <em>This should be emphasized.</em></p>
         [Fact]
         public void HtmlFormatter_ShouldReturnStrong()
         {
-            var htmlFormatter = new HtmlFormatter();
+            var htmlFormatter = _formatterFactory.CreateHtmlFormatterWithDefaultRules();
 
             var ast = new TextParagraphBlock(new IAbstractSyntaxTreeInline[]
             {
@@ -100,6 +102,7 @@ This is a text. <strong>This should be strong.</strong></p>
 
             var memoryStream = new MemoryStream();
             htmlFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {
@@ -111,7 +114,7 @@ This is a text. <strong>This should be strong.</strong></p>
         [Fact]
         public void HtmlFormatter_ShouldReturnHyperlink()
         {
-            var htmlFormatter = new HtmlFormatter();
+            var htmlFormatter = _formatterFactory.CreateHtmlFormatterWithDefaultRules();
 
             var ast = new TextParagraphBlock(new IAbstractSyntaxTreeInline[]
             {
@@ -128,6 +131,7 @@ There is some text and a <a href=""http://example.com"">link</a></p>
 
             var memoryStream = new MemoryStream();
             htmlFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {
@@ -139,7 +143,7 @@ There is some text and a <a href=""http://example.com"">link</a></p>
         [Fact]
         public void HtmlFormatter_ShouldReturnImage()
         {
-            var htmlFormatter = new HtmlFormatter();
+            var htmlFormatter = _formatterFactory.CreateHtmlFormatterWithDefaultRules();
 
             var ast = new TextParagraphBlock(new []
             {
@@ -156,6 +160,7 @@ There is some text and a <a href=""http://example.com"">link</a></p>
 
             var memoryStream = new MemoryStream();
             htmlFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {
@@ -167,7 +172,7 @@ There is some text and a <a href=""http://example.com"">link</a></p>
         [Fact]
         public void HtmlFormatter_ShouldReturnCode()
         {
-            var htmlFormatter = new HtmlFormatter();
+            var htmlFormatter = _formatterFactory.CreateHtmlFormatterWithDefaultRules();
 
             var ast = new TextParagraphBlock(new IAbstractSyntaxTreeInline[]
             {
@@ -181,6 +186,7 @@ This is a text. <code>This should be some code.</code></p>
 
             var memoryStream = new MemoryStream();
             htmlFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {
@@ -192,7 +198,7 @@ This is a text. <code>This should be some code.</code></p>
         [Fact]
         public void HtmlFormatter_ShouldReturnEnumeration()
         {
-            var htmlFormatter = new HtmlFormatter();
+            var htmlFormatter = _formatterFactory.CreateHtmlFormatterWithDefaultRules();
 
             var ast = new EnumerationBlock(
                 items: new[]
@@ -212,6 +218,7 @@ This is a text. <code>This should be some code.</code></p>
 
             var memoryStream = new MemoryStream();
             htmlFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {

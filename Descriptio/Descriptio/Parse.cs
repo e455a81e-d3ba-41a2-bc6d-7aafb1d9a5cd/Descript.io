@@ -26,7 +26,7 @@ namespace Descriptio
             if (parser is null) throw new ArgumentNullException(nameof(parser));
 
             var lexerResult = lexer.Lex(input);
-            if (lexerResult.IsSome())
+            if (lexerResult.IsNone())
             {
                 return new ParseResult(FSharpOption<IAbstractSyntaxTreeBlock>.None);
             }

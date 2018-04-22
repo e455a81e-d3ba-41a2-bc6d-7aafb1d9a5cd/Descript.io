@@ -10,7 +10,7 @@ namespace Descriptio.Tests.IntegrationTests.HtmlFormatter
         [Fact]
         public void HtmlFormatter_ShouldYieldDocument()
         {
-            var htmlFormatter = new Descriptio.Transform.Html.HtmlFormatter();
+            var htmlFormatter = new Transform.Html.HtmlFormatter();
 
             var ast = new TitleAst(
                 "Title 1",
@@ -50,7 +50,7 @@ namespace Descriptio.Tests.IntegrationTests.HtmlFormatter
                         )
                 )));
 
-            var expectedResult = @"<h1>Title 1</h1>
+            string expectedResult = @"<h1>Title 1</h1>
 <p>
 This is a text.</p>
 <h2>Title 2</h2>
@@ -71,10 +71,11 @@ Here, we should have a new paragraph <a href=""http://example.com"">with a link<
 
             var memoryStream = new MemoryStream();
             htmlFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {
-                var result = streamReader.ReadToEnd();
+                string result = streamReader.ReadToEnd();
                 Assert.Equal(expectedResult, result);
             }
         }

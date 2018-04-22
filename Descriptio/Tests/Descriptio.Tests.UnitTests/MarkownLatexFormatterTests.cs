@@ -1,60 +1,60 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using Descriptio.Core.AST;
-using Descriptio.Transform.Latex;
+using Descriptio.Factories;
 using Xunit;
 
 namespace Descriptio.Tests.UnitTests
 {
     public class MarkownLatexFormatterTests
     {
+        private readonly FormatterFactory _formatterFactory = new FormatterFactory();
+
         [Fact]
         public void LatexFormatter_ShouldReturnTitle()
         {
-            var latexFormatter = new LatexFormatter();
+            var latexFormatter = _formatterFactory.CreateLaTexFormatterWithDefaultRules();
 
             var ast = new TitleAst(
                 "Title 1",
-                level: 1,
-                next: null);
+                level: 1);
 
-            var expectedResult = @"\section*{Title 1}
+            string expectedResult = @"\section*{Title 1}
 ";
 
             var memoryStream = new MemoryStream();
             latexFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {
-                var result = streamReader.ReadToEnd();
+                string result = streamReader.ReadToEnd();
                 Assert.Equal(expectedResult, result);
             }
-
         }
 
         [Fact]
         public void LatexFormatter_ShouldReturnTextLine()
         {
-            var latexFormatter = new LatexFormatter();
+            var latexFormatter = _formatterFactory.CreateLaTexFormatterWithDefaultRules();
 
             var ast = new TextParagraphBlock(new[]
             {
                 new CleanTextInline("This is a text."),
             });
 
-            var expectedResult = @"\begin{paragraph}{}
+            string expectedResult = @"\begin{paragraph}{}
 This is a text.
 \end{paragraph}
 ";
 
             var memoryStream = new MemoryStream();
             latexFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {
-                var result = streamReader.ReadToEnd();
+                string result = streamReader.ReadToEnd();
                 Assert.Equal(expectedResult, result);
             }
         }
@@ -62,7 +62,7 @@ This is a text.
         [Fact]
         public void LatexFormatter_ShouldReturnEmphasis()
         {
-            var latexFormatter = new LatexFormatter();
+            var latexFormatter = _formatterFactory.CreateLaTexFormatterWithDefaultRules();
 
             var ast = new TextParagraphBlock(new IAbstractSyntaxTreeInline[]
             {
@@ -70,17 +70,18 @@ This is a text.
                 new EmphasisTextInline("This should be emphasized."),
             });
 
-            var expectedResult = @"\begin{paragraph}{}
+            string expectedResult = @"\begin{paragraph}{}
 This is a text. \emph{This should be emphasized.}
 \end{paragraph}
 ";
 
             var memoryStream = new MemoryStream();
             latexFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {
-                var result = streamReader.ReadToEnd();
+                string result = streamReader.ReadToEnd();
                 Assert.Equal(expectedResult, result);
             }
         }
@@ -88,7 +89,7 @@ This is a text. \emph{This should be emphasized.}
         [Fact]
         public void LatexFormatter_ShouldReturnStrong()
         {
-            var latexFormatter = new LatexFormatter();
+            var latexFormatter = _formatterFactory.CreateLaTexFormatterWithDefaultRules();
 
             var ast = new TextParagraphBlock(new IAbstractSyntaxTreeInline[]
             {
@@ -96,17 +97,18 @@ This is a text. \emph{This should be emphasized.}
                 new StrongTextInline("This should be strong."),
             });
 
-            var expectedResult = @"\begin{paragraph}{}
+            string expectedResult = @"\begin{paragraph}{}
 This is a text.\textbf{This should be strong.}
 \end{paragraph}
 ";
 
             var memoryStream = new MemoryStream();
             latexFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {
-                var result = streamReader.ReadToEnd();
+                string result = streamReader.ReadToEnd();
                 Assert.Equal(expectedResult, result);
             }
         }
@@ -114,7 +116,7 @@ This is a text.\textbf{This should be strong.}
         [Fact]
         public void LatexFormatter_ShouldReturnHyperlink()
         {
-            var latexFormatter = new LatexFormatter();
+            var latexFormatter = _formatterFactory.CreateLaTexFormatterWithDefaultRules();
 
             var ast = new TextParagraphBlock(new IAbstractSyntaxTreeInline[]
             {
@@ -125,17 +127,18 @@ This is a text.\textbf{This should be strong.}
                 title: "It is a title"
             )});
 
-            var expectedResult = @"\begin{paragraph}{}
+            string expectedResult = @"\begin{paragraph}{}
 There is some text and a \href{http://example.com}{link}
 \end{paragraph}
 ";
 
             var memoryStream = new MemoryStream();
             latexFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {
-                var result = streamReader.ReadToEnd();
+                string result = streamReader.ReadToEnd();
                 Assert.Equal(expectedResult, result);
             }
         }
@@ -143,7 +146,7 @@ There is some text and a \href{http://example.com}{link}
         [Fact]
         public void LatexFormatter_ShouldReturnImage()
         {
-            var latexFormatter = new LatexFormatter();
+            var latexFormatter = _formatterFactory.CreateLaTexFormatterWithDefaultRules();
 
             var ast = new TextParagraphBlock(new []
             {
@@ -151,7 +154,7 @@ There is some text and a \href{http://example.com}{link}
             });
 
 
-            var expectedResult = @"\begin{paragraph}{}
+            string expectedResult = @"\begin{paragraph}{}
 \begin{figure}[h]
 \centering
 \includegraphics{C:\Path\To\An\Image.jpg}
@@ -163,10 +166,11 @@ There is some text and a \href{http://example.com}{link}
 
             var memoryStream = new MemoryStream();
             latexFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {
-                var result = streamReader.ReadToEnd();
+                string result = streamReader.ReadToEnd();
                 Assert.Equal(expectedResult, result);
             }
         }
@@ -174,7 +178,7 @@ There is some text and a \href{http://example.com}{link}
         [Fact]
         public void LatexFormatter_ShouldReturnCode()
         {
-            var latexFormatter = new LatexFormatter();
+            var latexFormatter = _formatterFactory.CreateLaTexFormatterWithDefaultRules();
 
             var ast = new TextParagraphBlock(new IAbstractSyntaxTreeInline[]
             {
@@ -182,7 +186,7 @@ There is some text and a \href{http://example.com}{link}
                 new CodeTextInline("This should be some code."),
             });
 
-            var expectedResult = @"\begin{paragraph}{}
+            string expectedResult = @"\begin{paragraph}{}
 This is a text. \begin{verbatim}
 This should be some code.
 \end{verbatim}
@@ -192,10 +196,11 @@ This should be some code.
 
             var memoryStream = new MemoryStream();
             latexFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {
-                var result = streamReader.ReadToEnd();
+                string result = streamReader.ReadToEnd();
                 Assert.Equal(expectedResult, result);
             }
         }
@@ -203,7 +208,7 @@ This should be some code.
         [Fact]
         public void LatexFormatter_ShouldReturnEnumeration()
         {
-            var latexFormatter = new LatexFormatter();
+            var latexFormatter = _formatterFactory.CreateLaTexFormatterWithDefaultRules();
 
             var ast = new EnumerationBlock(
                 items: new[]
@@ -214,7 +219,7 @@ This should be some code.
                     }
                 );
 
-            var expectedResult = @"\begin{itemize}
+            string expectedResult = @"\begin{itemize}
 \item [1] This should be item 1.
 \item [2] This should be the second item.
 \item [1234] Though, this should be item 3.
@@ -223,14 +228,13 @@ This should be some code.
 
             var memoryStream = new MemoryStream();
             latexFormatter.Transform(ast, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
             using (var streamReader = new StreamReader(memoryStream, Encoding.UTF8))
             {
-                var result = streamReader.ReadToEnd();
+                string result = streamReader.ReadToEnd();
                 Assert.Equal(expectedResult, result);
             }
         }
-
-
     }
 }
