@@ -21,4 +21,8 @@ This package contains the formatters for HTML, LaTex, XML and JSON.</Description
     <ProjectReference Include="..\Descriptio.Core\Descriptio.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+  </ItemGroup>
+
 </Project>
