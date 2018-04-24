@@ -52,12 +52,12 @@ The easiest way to use the library is by using the integrated Fluent API.
 using Descriptio;
 
 // generate LaTex out of markdown
-string latexResult = Parse.MarkdownString("# Hello World!")
-                          .AndFormatToLaTexString();
+var latexResult = Parse.MarkdownString("# Hello World!")
+                       .AndFormatToLaTexString();
 
 // generate HTML out of markdown
-string htmlResult = Parse.MarkdownString("# Hello World!")
-                         .AndFormatToHtmlString();
+var htmlResult = Parse.MarkdownString("# Hello World!")
+                      .AndFormatToHtmlString();
 ```
 
 ## Contribution
