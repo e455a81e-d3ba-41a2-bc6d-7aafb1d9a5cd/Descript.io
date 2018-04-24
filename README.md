@@ -7,7 +7,7 @@ A .NET library for customizable parsing of markdown documents and transforming i
 
 ## Basic structure
 
-Descript.io is consists of four projects:
+Descript.io consists of four projects:
 
 ### Descriptio.Core
 
@@ -54,7 +54,7 @@ string htmlResult = Parse.MarkdownString("# Hello World!")
 
 ## Contribution
 
-See [CONTRIBUTION](https://raw.githubusercontent.com/LariscusObscurus/Descript.io/master/CONTRIBUTION)
+See [CONTRIBUTING](https://raw.githubusercontent.com/LariscusObscurus/Descript.io/master/CONTRIBUTING)
 
 ## License
 
