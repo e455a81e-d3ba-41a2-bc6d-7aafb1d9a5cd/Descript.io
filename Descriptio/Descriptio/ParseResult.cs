@@ -39,7 +39,7 @@ namespace Descriptio
         /// <exception cref="InvalidOperationException">
         /// Thrown if the <see cref="ParserResult"/> is <see cref="FSharpOption{T}.None"/>.
         /// </exception>
-        public string AndFormatToLaTexString() => AndFormatToStringUsing(_formatterFactory.CreateLaTexFormatterWithDefaultRules());
+        public FSharpOption<string> AndFormatToLaTexString() => AndFormatToStringUsing(_formatterFactory.CreateLaTexFormatterWithDefaultRules());
 
         /// <summary>
         /// Formats the result to an HTML string using the default formatter.
@@ -48,7 +48,7 @@ namespace Descriptio
         /// <exception cref="InvalidOperationException">
         /// Thrown if the <see cref="ParserResult"/> is <see cref="FSharpOption{T}.None"/>.
         /// </exception>
-        public string AndFormatToHtmlString() => AndFormatToStringUsing(_formatterFactory.CreateHtmlFormatterWithDefaultRules());
+        public FSharpOption<string> AndFormatToHtmlString() => AndFormatToStringUsing(_formatterFactory.CreateHtmlFormatterWithDefaultRules());
 
         /// <summary>
         /// Formats the result to an XML string using the default formatter.
@@ -57,7 +57,7 @@ namespace Descriptio
         /// <exception cref="InvalidOperationException">
         /// Thrown if the <see cref="ParserResult"/> is <see cref="FSharpOption{T}.None"/>.
         /// </exception>
-        public string AndFormatToXmlString() => AndFormatToStringUsing(_formatterFactory.CreateXmlFormatterWithDefaultRules());
+        public FSharpOption<string> AndFormatToXmlString() => AndFormatToStringUsing(_formatterFactory.CreateXmlFormatterWithDefaultRules());
 
         /// <summary>
         /// Formats the result to a JSON string using the default formatter.
@@ -66,7 +66,7 @@ namespace Descriptio
         /// <exception cref="InvalidOperationException">
         /// Thrown if the <see cref="ParserResult"/> is <see cref="FSharpOption{T}.None"/>.
         /// </exception>
-        public string AndFormatToJsonString() => AndFormatToStringUsing(_formatterFactory.CreateJsonFormatterWithDefaultRules());
+        public FSharpOption<string> AndFormatToJsonString() => AndFormatToStringUsing(_formatterFactory.CreateJsonFormatterWithDefaultRules());
 
         /// <summary>
         /// Formats the result using a specified formatter-
@@ -82,13 +82,16 @@ namespace Descriptio
         /// <exception cref="InvalidOperationException">
         /// Thrown if the <see cref="ParserResult"/> is <see cref="FSharpOption{T}.None"/>.
         /// </exception>
-        public string AndFormatToStringUsing(IFormatter formatter)
+        public FSharpOption<string> AndFormatToStringUsing(IFormatter formatter)
         {
-            ThrowIfCannotFormat();
-
             if (formatter is null)
             {
                 throw new ArgumentNullException(nameof(formatter));
+            }
+
+            if (ParserResult.IsNone())
+            {
+                return FSharpOption<string>.None;
             }
 
             using (var targetStream = new MemoryStream())
@@ -100,21 +103,6 @@ namespace Descriptio
                 {
                     return sr.ReadToEnd();
                 }
-            }
-        }
-
-        /// <summary>
-        /// Throws an <see cref="InvalidOperationException"/> if the parser result is <see cref="FSharpOption{T}.None"/>
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown if the value of <see cref="ParserResult"/> is <see cref="FSharpOption{T}.None"/>.
-        /// </exception>
-        protected void ThrowIfCannotFormat()
-        {
-            if (ParserResult.IsNone())
-            {
-                throw new InvalidOperationException(
-                    "Formatting cannot be executed, because parsing failed previously.");
             }
         }
     }

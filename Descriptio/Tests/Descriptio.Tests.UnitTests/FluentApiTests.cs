@@ -3,6 +3,7 @@ using System.IO;
 using Descriptio.Core.AST;
 using Descriptio.Extensions;
 using Descriptio.Factories;
+using Descriptio.Tests.FluentAssertionsExtensions;
 using FluentAssertions;
 using Microsoft.FSharp.Core;
 using Xunit;
@@ -44,10 +45,10 @@ namespace Descriptio.Tests.UnitTests
             }
 
             // Act
-            string actual = Parse.MarkdownString(input).AndFormatToHtmlString();
+            var actual = Parse.MarkdownString(input).AndFormatToHtmlString();
 
             // Assert
-            actual.Should().Be(expected);
+            actual.Should().BeSome().And.Subject.Value.Should().Be(expected);
         }
 
         [Fact(DisplayName = "Fluent API parsing markdown and transform to LaTex should return the same as the factories.")]
@@ -79,10 +80,10 @@ namespace Descriptio.Tests.UnitTests
             }
 
             // Act
-            string actual = Parse.MarkdownString(input).AndFormatToLaTexString();
+            var actual = Parse.MarkdownString(input).AndFormatToLaTexString();
 
             // Assert
-            actual.Should().Be(expected);
+            actual.Should().BeSome().And.Subject.Value.Should().Be(expected);
         }
 
         [Fact(DisplayName = "Fluent API parsing markdown and transform to XML should return the same as the factories.")]
@@ -114,10 +115,10 @@ namespace Descriptio.Tests.UnitTests
             }
 
             // Act
-            string actual = Parse.MarkdownString(input).AndFormatToXmlString();
+            var actual = Parse.MarkdownString(input).AndFormatToXmlString();
 
             // Assert
-            actual.Should().Be(expected);
+            actual.Should().BeSome().And.Subject.Value.Should().Be(expected);
         }
 
         [Fact(DisplayName = "Fluent API parsing markdown and transform to Json should return the same as the factories.")]
@@ -149,10 +150,10 @@ namespace Descriptio.Tests.UnitTests
             }
 
             // Act
-            string actual = Parse.MarkdownString(input).AndFormatToJsonString();
+            var actual = Parse.MarkdownString(input).AndFormatToJsonString();
 
             // Assert
-            actual.Should().Be(expected);
+            actual.Should().BeSome().And.Subject.Value.Should().Be(expected);
         }
     }
 }
