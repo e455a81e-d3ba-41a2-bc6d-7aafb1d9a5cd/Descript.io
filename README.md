@@ -1,3 +1,5 @@
+
+
 # Descript.io
 
 ![CI Build status](https://descriptio.visualstudio.com/_apis/public/build/definitions/e2d445fe-8893-4fad-9387-10f513d44c02/1/badge)
@@ -35,6 +37,7 @@ Using dotnet CLI
 ```bat
 dotnet add package Descriptio
 ```
+All published versions can be found on [NuGet](https://www.nuget.org/packages/Descriptio).
 
 ## Using the Descript.io library
 
