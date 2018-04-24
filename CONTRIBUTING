@@ -1,0 +1,23 @@
+Contributing
+
+General
+When enhancing this repository with bigger features, we kindly ask you to first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a bigger change which might affect further development.
+Also, in case of feature development, please create feature branches and make sure to pull the latest changes from the mainline regularly.
+In case one of your commits breaks the automated builds, please make sure that fixing this issue is the first thing you do.
+Furthermore the versioning scheme we use is semantic versioning.
+
+Coding conventions
+Please try to keep up with the coding conventions which were followed so far (a more detailed list will follow soon).
+To keep the project stable we include unit and integration tests (Xunit) for every testable chunk of code - please follow this approach.
+
+Pull Request Process
+Ensure that you have a stable build and all tests are passing locally before you create a pull request.
+Always write a clear log message for your commits. One-line messages are fine for small changes, but bigger changes should look like this:
+
+$ git commit -m "Added some feature
+> 
+> A paragraph/list describing what changed and its impact"
+
+You may merge the Pull Request in once you have the sign-off of one of the authors (for now, but this might change with a bigger community).
+If necessary please also update the README.md with details related to the changes.
+Processes like updating the nuget package or tagging the repository will for now also be done by one of the authors.
