@@ -2,7 +2,7 @@
 
 # Descript.io
 
-![CI Build status](https://descriptio.visualstudio.com/_apis/public/build/definitions/e2d445fe-8893-4fad-9387-10f513d44c02/1/badge)
+![CI Build status](https://descriptio.visualstudio.com/_apis/public/build/definitions/e2d445fe-8893-4fad-9387-10f513d44c02/3/badge)
 [![CodeFactor](https://www.codefactor.io/repository/github/lariscusobscurus/descript.io/badge)](https://www.codefactor.io/repository/github/lariscusobscurus/descript.io)
 
 A .NET library for customizable parsing of markdown documents and transforming into other formats.
