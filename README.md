@@ -11,18 +11,23 @@ A .NET library for customizable parsing of markdown documents and transforming i
 
 Descript.io consists of four projects:
 
+### Descriptio
+
+This project acts as a meta-package which references the other Descript.io packages.
+Additionally, it provides an easy-to-use API surface.
+
 ### Descriptio.Core
 
-This package contains the structure of the abstract syntax tree.
+This project contains the structure of the abstract syntax tree.
 
 ### Descriptio.Parser
 
-This package contains the markdown lexer and parser components.
+This project contains the markdown lexer and parser components.
 It is written entirely in F# and uses many syntactic advantages compared to a parser written in C#.
 
 ### Descriptio.Transform
 
-This package contains the formatters for HTML, LaTex, XML and JSON.
+This project contains the formatters for HTML, LaTex, XML and JSON.
 
 ## Usage
 
@@ -57,7 +62,7 @@ string htmlResult = Parse.MarkdownString("# Hello World!")
 
 ## Contribution
 
-See [CONTRIBUTING](https://raw.githubusercontent.com/LariscusObscurus/Descript.io/master/CONTRIBUTING)
+See [CONTRIBUTING](CONTRIBUTING)
 
 ## License
 
