@@ -4,10 +4,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageLicenseUrl>https://raw.githubusercontent.com/LariscusObscurus/Descript.io/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/LariscusObscurus/Descript.io</PackageProjectUrl>
-    <Copyright>© 2018 David Eiwen, Sandra Schneider, Leonhardt Schwartz</Copyright>
+    <Copyright>© 2018 David Eiwen, Sandra Schneider, Leonhardt Schwarz</Copyright>
     <Company>David Eiwen, Sandra Schneider, Leonhardt Schwartz</Company>
-    <Authors>David Eiwen, Sandra Schneider, Leonhardt Schwartz</Authors>
-    <Version>1.0.0-alpha002</Version>
+    <Authors>David Eiwen, Sandra Schneider, Leonhardt Schwarz</Authors>
+    <Version>1.0.0</Version>
     <Product>Descript.io</Product>
     <RepositoryUrl>https://github.com/LariscusObscurus/Descript.io</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

@@ -5,15 +5,15 @@
     <LangVersion>latest</LangVersion>
 
     <Title>Descript.io Core</Title>
-    <Authors>David Eiwen, Sandra Schneider, Leonhardt Schwartz</Authors>
+    <Authors>David Eiwen, Sandra Schneider, Leonhardt Schwarz</Authors>
     <PackageId>Descriptio.Core</PackageId>
     <Product>Descript.io</Product>
-    <Version>1.0.0-alpha002</Version>
+    <Version>1.0.0</Version>
     <RepositoryUrl>https://github.com/LariscusObscurus/Descript.io</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/LariscusObscurus/Descript.io</PackageProjectUrl>
     <PackageLicenseUrl>https://raw.githubusercontent.com/LariscusObscurus/Descript.io/master/LICENSE</PackageLicenseUrl>
-    <Copyright>© 2018 David Eiwen, Sandra Schneider, Leonhardt Schwartz</Copyright>
+    <Copyright>© 2018 David Eiwen, Sandra Schneider, Leonhardt Schwarz</Copyright>
     <PackageTags>markdown parser transform document</PackageTags>
     <Description>A library for customizable parsing of markdown documents and transforming into other formats.
 
